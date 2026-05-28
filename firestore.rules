@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isString(field) {
+      return field is string && field.size() > 0 && field.size() < 500;
+    }
+
+    function isList(field) {
+      return field is list && field.size() < 100;
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isString(request.resource.data.name) && isString(request.resource.data.email);
+    }
+
+    match /schedules/{userId} {
+      allow read: if true;
+      allow create, update: if isList(request.resource.data.blocks);
+    }
+
+    match /groups/{groupId} {
+      allow read: if true;
+      allow create, update: if isString(request.resource.data.name)
+        && isString(request.resource.data.ownerId)
+        && isList(request.resource.data.memberIds);
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create, update: if isString(request.resource.data.groupId)
+        && isString(request.resource.data.title)
+        && isString(request.resource.data.status);
+    }
+  }
+}

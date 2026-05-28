@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WorkSync - My Groups</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#0058be",
+                    "border-subtle": "#e5e7eb",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#64a8fe",
+                    "outline-variant": "#c2c6d6",
+                    "tertiary": "#006b2c",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-bright": "#f8f9fa",
+                    "surface-tint": "#005ac2",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#f3f4f5",
+                    "tertiary-fixed": "#7ffc97",
+                    "status-occupied": "#9ca3af",
+                    "primary-container": "#2170e4",
+                    "outline": "#727785",
+                    "surface-dim": "#d9dadb",
+                    "secondary-fixed": "#d4e3ff",
+                    "on-background": "#191c1d",
+                    "surface-container-highest": "#e1e3e4",
+                    "tertiary-container": "#00873a",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary-fixed-variant": "#004883",
+                    "on-secondary-container": "#003c70",
+                    "inverse-primary": "#adc6ff",
+                    "secondary-fixed-dim": "#a4c9ff",
+                    "error-red": "#dc2626",
+                    "text-secondary": "#6b7280",
+                    "on-tertiary-container": "#f7fff2",
+                    "on-surface-variant": "#424754",
+                    "status-free": "#4ade80",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-error-container": "#93000a",
+                    "status-avoid": "#fde047",
+                    "surface-container-high": "#e7e8e9",
+                    "on-secondary-fixed": "#001c39",
+                    "surface-container-lowest": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e3132",
+                    "on-surface": "#191c1d",
+                    "secondary": "#0060ac",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-tertiary-fixed": "#002109",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#005320",
+                    "error": "#ba1a1a",
+                    "surface": "#f8f9fa",
+                    "background": "#f8f9fa",
+                    "on-primary-container": "#fefcff",
+                    "surface-container": "#edeeef",
+                    "primary-fixed": "#d8e2ff",
+                    "on-primary-fixed": "#001a42",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#62df7d",
+                    "status-preferred": "#60a5fa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "element-gap": "12px",
+                    "container-margin": "24px",
+                    "unit": "4px",
+                    "mobile-margin": "16px",
+                    "grid-gap": "1px",
+                    "section-padding": "32px"
+            },
+            "fontFamily": {
+                    "grid-time": ["JetBrains Mono"],
+                    "label-sm": ["JetBrains Mono"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "grid-time": ["11px", {"lineHeight": "1", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9fa;
+            color: #191c1d;
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="w-full top-0 sticky z-50 bg-surface-container-lowest shadow-sm">
+<div class="flex justify-between items-center px-container-margin h-16 w-full max-w-[1200px] mx-auto">
+<div class="flex items-center gap-4">
+<img alt="WorkSync Logo" class="h-8 w-8 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz--TOLUQhId43Kv_cGcVep884lK2mWehle9vl1QnodH5yDtvmQagaM-NNyCcA0gOySzEq8xagYt3rey-lskvMiPHoqVqIY4ZE2msJ79Bzo3PEtpR03jdl157meE1jbuPt5D2kXYN-chOFHnhcxW3cnwDC0B_LxwkWFJ0-lNISgnFmoG5gHzmukUQP4Cq6JEnP0Oj4vZ5Z_NKwurtJgI4d2Zol3OmUn_PDtVLepOCuPwp1V3jt6_OzGbQoqj-duQHHx0roSvMhKBo"/>
+<span class="font-headline-md text-headline-md font-bold text-primary">WorkSync</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Home</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">My Schedule</a>
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">My Groups</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Friends</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Alerts</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-body-md transition-transform active:scale-95 hover:bg-primary-container">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Create Event
+                </button>
+<div class="h-10 w-10 rounded-full bg-secondary-fixed overflow-hidden border-2 border-primary">
+<img alt="User profile" class="h-full w-full object-cover" data-alt="A professional headshot of a young university student with a friendly smile, set against a soft-focus campus background. The lighting is natural and bright, conveying a sense of approachability and academic focus. The overall aesthetic is clean and modern, matching a light-mode corporate-educational user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYXGVfLmDFy-C9I6uo6DnYEsXxhSwSE6MK1oiFkvZa-nxpcM83We3ZqsSWGKArezW-cfupH7-oSbgkEeRYSTd_2eNNgHlhStQrzAD12FoScx8pI78PgwSx1LI9viJmpgsg6v68OJ3Uxtiy01DracAqT6STA1uO9oiwgRAKCouKQt2XoA5kHmYEJvCap_EXGVQfjOKKsFB7TZfxUtEcUPxmwUwAw8N-THUpdzNParDY21-JQRYXE5G-_KC5iJdHv4Ohp7aDRq3Xn90"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-container-margin py-section-padding">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">My Groups</h1>
+<p class="font-body-md text-body-md text-text-secondary">Manage your active collaborations and study teams.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 bg-surface-container-high text-primary px-5 py-2.5 rounded-lg font-body-md font-bold transition-all hover:bg-surface-container-highest active:scale-95">
+<span class="material-symbols-outlined">group_add</span>
+                    Join a Group
+                </button>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-md font-bold transition-all shadow-sm hover:shadow-md active:scale-95">
+<span class="material-symbols-outlined">add_circle</span>
+                    Create Group
+                </button>
+</div>
+</div>
+<!-- Bento-inspired Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Group Card 1: Math Project -->
+<div class="group bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_10px_rgba(0,88,190,0.04)] border border-border-subtle transition-all hover:shadow-lg hover:-translate-y-1">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary-fixed rounded-xl">
+<span class="material-symbols-outlined text-primary text-[28px]">calculate</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-status-free/20 text-tertiary font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                        Active
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Math Project</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-6 line-clamp-2">Calculus III study group focused on final exam preparation and weekly problem sets.</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Close up portrait of a male student wearing glasses, looking focused and academic. Bright daylight lighting, professional yet casual vibe, consistent with a modern student scheduling application style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWJ05ijVz-bp5RFvyjcXhV56gOYjphYMe_KGorBPwfYij7-jMdlBCMfeq6VlhAM8qBF5DFmEPjKY-rvyLw2ZM0G6uRp5uhzX7Xt0u7Xw9ZZ8RshBh_KFG-r3rHBGMC6iWNy_ykXLm1jzcBRilWNJK1cQ5bcoR4u9TSwdEOZi0kt0Z5O7w_VvaLysfIzgAGzasdXHjJL2tq8uAT5lIP3Ld4tBqRqvZCSyQXzQX4yXKRiApEfOXmwGevg_NJ0dE8926zbVqY0V0Cyy4"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Portrait of a female student with curly hair, smiling cheerfully. The setting is an indoor study space with soft, warm lighting. High-quality digital photography for a friendly user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2VCDoNWdtF-50q4Js-38OFk4Edl2FiVRcfC99BSiu0kNJL_GvR3tATzUSoVGI8Bz59P095505Br2BIMEIFV4Ow3ylDgnsqJrAvAY9vGv7T7CG4ZaBoPieGmZy7V_oC2k7J73othzceOrDik4UO1OQFoRpq_UYjgLBZdpae1vb2sV2oCCPMjglF3kQHqN50x-NTv9Oy9jI1WjQm3Nf1hLpox6ZDU82MGSaxfFiX-_PVDbi1STsDzz2Y_ofgcrnAWPDVU6OfesQhTc"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Profile picture of a young man with a creative look, wearing a beanie. Neutral studio background, soft shadows, clean aesthetic for a modern group coordination tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGyK3QAZQ9yUVIg1msCoS24IdXKqInceTsPJ-M_yRZ6O9_vRntgs5NSSUCXE7QX-jOUCD6LiN4YsO6JEzPVU-lhpqxmM0rkQtsN7Y_sgOEeLG7QUqHEtF-C5HpakLzVCgE4GJ_YHE_rKQA4SRmCoR73WkqdT7sfysZRi7mL8CLOKPPEvR67XrTCEF_d4rzYE-ubnhRZqjSt46nm9WJgtlLFMewxM0aMks_0DbKzqSihObvwMYab7Pndg1gbnohcX6Wg-G54oLsFSs"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-primary-fixed flex items-center justify-center text-primary font-label-sm text-[10px]">
+                            +12
+                        </div>
+</div>
+<span class="text-text-secondary font-label-sm text-label-sm">15 Members</span>
+</div>
+</div>
+<!-- Group Card 2: Study Group -->
+<div class="group bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_10px_rgba(0,88,190,0.04)] border border-border-subtle transition-all hover:shadow-lg hover:-translate-y-1">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-secondary-fixed rounded-xl">
+<span class="material-symbols-outlined text-secondary text-[28px]">menu_book</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-status-avoid/20 text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-avoid"></span>
+                        Pending
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Study Group</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-6 line-clamp-2">Weekly review for Advanced Economics. Currently waiting for more members to join.</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="A portrait of a young woman in a library setting, looking scholarly and engaged. Natural soft light filtering through windows. High resolution and modern corporate color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh-n57WZp3vNW22REAYIPUJ5q7TF3ZhatEGjCF1qEDvB7_4_QGF2jeGDf3JpQGphAS9n2IfFdL-Np6LuUqmjD1Kcayi9gr3Aky5N8tLfOihDMYFVMMZcGykw6Ipws6ekEFhqlgi9MLGpbwxMTg1ionkIhjlFG2B7SBfcvKjgwVIedzTtQT84r8EkPqct3iBAGKXTIfIz1RwqYMmuQiwnzk9XI7dnBvluBQ6UiJueIn5femjYCv6ou4yRjursU1WP4No1NghJjPZh4"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Portrait of a young male student in a bright workshop environment. Energetic and approachable expression. Cohesive with a productive, high-air layout brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDw0HTKxdoqy3JSgdn4rRU0ZI0OML2z_TQVk2e88ynlCc4FC-koclp6JMQpDKmphjL-6Og8Vn4elZZsGbuNdgs2U_cFYMBUniw4bR4ygxCAGPCzRGkgp3qmYi4hUGwsweKEsK9nz9ZNhPiW4zZlXgW8a2X3vErjlSDL-yhzcUsRO2CQ0-s1naKVDY8fAecdNRQCi5biHaWoS6QhsCdr6w-b_V0cWzjmx8YNmgWpPYChbyi9ea59NobboiZODkyqHlGFFiAavim3QKM"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-primary-fixed flex items-center justify-center text-primary font-label-sm text-[10px]">
+                            +2
+                        </div>
+</div>
+<span class="text-text-secondary font-label-sm text-label-sm">4 Members</span>
+</div>
+</div>
+<!-- Group Card 3: Football Team -->
+<div class="group bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_10px_rgba(0,88,190,0.04)] border border-border-subtle transition-all hover:shadow-lg hover:-translate-y-1">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-tertiary-fixed rounded-xl">
+<span class="material-symbols-outlined text-tertiary text-[28px]">sports_soccer</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-status-occupied/20 text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-occupied"></span>
+                        Inactive
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Football Team</h3>
+<p class="font-body-md text-body-md text-text-secondary mb-6 line-clamp-2">Intramural team for the spring season. All matches currently concluded.</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-3">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Casual headshot of an athletic young man outdoors on a sunny day. Vibrant natural colors, energetic atmosphere, fitting for a sports-related group card in a UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr-x_SWImfTtpmx970wDLKRYVTK2asU3tObp99_x29QvY2_cieDOfDOQ8-Ze91y8GFIKLPXDhK1ev5hgIWXm4MDwBw5xAo25wOvC5Sh8YFI13rx5oakzLAfnEvZV5iEHvh4M_V030qX3xATLjC_tL9zeZCQcgJQ4fxz5ZJjwtIqOkD2Tj9V_TmN-xTq4Lhnb-rnaSuV79sV1K3-Ha4OPAaq5kczqk3yI1Kx_eiXVvIMgpEicMsiJm4oBuFEgQgYAQverbSaGGFp4U"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Friendly portrait of a female athlete with a ponytail, smiling in an outdoor park setting. Bright, high-key lighting and a fresh, clean look for a modern app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzMjWO8gfiZg5u92-xu6BrfEckf97zUo4O6uKsVonl_Z7adDdWW6k8E01IiB9ScG7i0zcj47oc-C80Lo377lEKSEpce8AMg3NIKCEtNEcAFYlcyTYUh060QEJgLifQimB-NnJVTzPzNJXX9G9PP_mgT6EzUBsxImg4ZoL0cgE9Yf37amlq8POsO9MJF-uHFv_R2s4u25f4KpRVxWBd1G4DpjU6-zmyuayXQ-54-eNoVL6pYGLtKtEeC5bdaBkuxpHAT7XyZVp-lu4"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest overflow-hidden bg-surface-dim">
+<img alt="Member" class="w-full h-full object-cover" data-alt="Close up of a young person with short hair, wearing a sports jersey, neutral expressions, clean lighting, professional grade photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwdz2oQbnSh5GHaw7HgJede6itI8OaOto0VgAwvLVXjk2NHimpmTR2UtaVsNS4MLFx1IqmPu54FslxlJ8v8bH0L2Se9ebGpeINO3e5WGBIdftSgrjHARBfZaocQA4u6i7hWruXjTRCDndzboz2cVVKORdHJxZmuh-h_55sJdT1Ods2q8OmE5awGpvc2WgAPacfZcXHBbs4b1n2xfHpq6cVCm9SSS6fABE39soHZ116qS2BN5UJNc6aYseZq8UJljdBGZRvxQNTQX0"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-primary-fixed flex items-center justify-center text-primary font-label-sm text-[10px]">
+                            +19
+                        </div>
+</div>
+<span class="text-text-secondary font-label-sm text-label-sm">22 Members</span>
+</div>
+</div>
+<!-- Featured Suggestion Card (Bento Style Large) -->
+<div class="lg:col-span-2 bg-gradient-to-br from-primary to-secondary-container rounded-xl p-8 flex flex-col md:flex-row items-center gap-8 shadow-md relative overflow-hidden group">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-from)_0%,_transparent_50%)] opacity-20"></div>
+<div class="relative z-10 flex-1">
+<div class="inline-block px-3 py-1 rounded-full bg-white/20 text-white font-label-sm text-label-sm mb-4 backdrop-blur-sm">
+                        Recommended for you
+                    </div>
+<h2 class="font-headline-lg text-white mb-3">AI Ethics Workshop</h2>
+<p class="text-white/80 font-body-lg mb-6">Based on your interests in Computer Science and Philosophy. 92% of members are available during your free windows.</p>
+<button class="bg-white text-primary px-6 py-3 rounded-lg font-bold transition-all hover:shadow-lg active:scale-95">
+                        View Recommendations
+                    </button>
+</div>
+<div class="relative z-10 w-full md:w-1/3 aspect-video bg-white/10 rounded-lg backdrop-blur-md border border-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[64px] opacity-40">auto_awesome</span>
+</div>
+</div>
+<!-- Quick Action Card -->
+<div class="bg-surface-container rounded-xl p-6 border-2 border-dashed border-outline-variant flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary hover:bg-surface-container-low transition-all">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-4 group-hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-outline group-hover:text-primary text-[32px]">search</span>
+</div>
+<h4 class="font-headline-md text-on-surface mb-1">Find More</h4>
+<p class="font-body-md text-text-secondary">Explore 50+ other public groups on campus.</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface-container-low border-t border-border-subtle">
+<div class="flex flex-col md:flex-row justify-between items-center py-section-padding px-container-margin w-full max-w-[1200px] mx-auto">
+<div class="mb-6 md:mb-0">
+<span class="font-headline-md text-headline-md text-primary font-bold">WorkSync</span>
+<p class="font-label-sm text-label-sm text-text-secondary mt-2">© 2024 WorkSync. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Support</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- FAB for mobile -->
+<div class="md:hidden fixed bottom-6 right-6">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</body></html>

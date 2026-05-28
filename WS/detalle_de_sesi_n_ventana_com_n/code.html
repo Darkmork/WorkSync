@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        .schedule-line {
+            background-image: radial-gradient(circle, #0058be 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "status-preferred": "#60a5fa",
+                "on-secondary-fixed": "#001c39",
+                "background": "#f8f9fa",
+                "inverse-on-surface": "#f0f1f2",
+                "primary-container": "#2170e4",
+                "inverse-primary": "#adc6ff",
+                "on-surface": "#191c1d",
+                "surface-container-high": "#e7e8e9",
+                "on-primary": "#ffffff",
+                "on-error": "#ffffff",
+                "error-container": "#ffdad6",
+                "tertiary": "#006b2c",
+                "on-surface-variant": "#424754",
+                "surface-dim": "#d9dadb",
+                "primary-fixed-dim": "#adc6ff",
+                "surface-tint": "#005ac2",
+                "surface": "#f8f9fa",
+                "outline": "#727785",
+                "on-secondary-fixed-variant": "#004883",
+                "secondary-fixed": "#d4e3ff",
+                "primary": "#0058be",
+                "error-red": "#dc2626",
+                "secondary": "#0060ac",
+                "surface-container-low": "#f3f4f5",
+                "surface-variant": "#e1e3e4",
+                "surface-container-lowest": "#ffffff",
+                "secondary-container": "#64a8fe",
+                "on-primary-fixed": "#001a42",
+                "surface-container": "#edeeef",
+                "tertiary-fixed-dim": "#62df7d",
+                "surface-bright": "#f8f9fa",
+                "surface-container-highest": "#e1e3e4",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-fixed": "#002109",
+                "tertiary-container": "#00873a",
+                "inverse-surface": "#2e3132",
+                "on-tertiary-container": "#f7fff2",
+                "on-secondary-container": "#003c70",
+                "on-primary-container": "#fefcff",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed": "#7ffc97",
+                "on-error-container": "#93000a",
+                "status-occupied": "#9ca3af",
+                "on-tertiary-fixed-variant": "#005320",
+                "outline-variant": "#c2c6d6",
+                "text-secondary": "#6b7280",
+                "status-avoid": "#fde047",
+                "on-background": "#191c1d",
+                "border-subtle": "#e5e7eb",
+                "status-free": "#4ade80",
+                "primary-fixed": "#d8e2ff",
+                "secondary-fixed-dim": "#a4c9ff",
+                "on-primary-fixed-variant": "#004395",
+                "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "element-gap": "12px",
+                "unit": "4px",
+                "grid-gap": "1px",
+                "section-padding": "32px",
+                "mobile-margin": "16px",
+                "container-margin": "24px"
+            },
+            "fontFamily": {
+                "body-md": ["Hanken Grotesk"],
+                "headline-lg-mobile": ["Hanken Grotesk"],
+                "label-sm": ["JetBrains Mono"],
+                "body-lg": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"],
+                "headline-md": ["Hanken Grotesk"],
+                "grid-time": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                "grid-time": ["11px", {"lineHeight": "1", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center px-mobile-margin md:px-container-margin py-unit w-full max-w-7xl mx-auto h-16">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors">arrow_back</button>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">Ventana Común</span>
+</div>
+<div class="flex items-center gap-container-margin">
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md" href="#">Mi Horario</a>
+<a class="text-primary font-bold border-b-2 border-primary py-4" href="#">Mis Grupos</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md" href="#">Amigos</a>
+</div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-primary p-2 hover:bg-surface-container-low rounded-full transition-colors">add_circle</button>
+<img alt="User" class="w-8 h-8 rounded-full object-cover border-2 border-primary-fixed" data-alt="A close-up professional headshot of a young student with a friendly expression. The lighting is soft and natural, emphasizing a clean and modern academic aesthetic. The background is a slightly blurred university library setting, maintaining the focus on the subject while reinforcing the brand's educational context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0esEt6LRMll9E85jLs4xE4RpUHh4mzyc3nF4NF1z3Ej-kcdfL-4ydWK3QWjmECX3uRzayGV8J9bPgECWpwKCXNainEmWwUp5Vqc_vWrLwqfK23CvfeprSxTUJQjUqKujciMWoNG8QppzgqYpBiOGWDRdnRgioBs1OmyN9EuPS9EwNCiltmT4_YZIZ0ILoq4hFl9ED0RoCSV3dlvnqUDdm3kIen8zt8zI0roKjTNB7kOx4Qja-1RyZOyMDI-AJyeqijpjU31pHG40"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-mobile-margin md:px-container-margin py-section-padding">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Primary Session Info -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Hero Session Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border-l-8 border-primary relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                            CONFIRMADA
+                        </span>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="space-y-2">
+<h1 class="text-headline-lg font-headline-lg text-on-surface">Repaso Cálculo II: Final Parcial</h1>
+<div class="flex items-center gap-4 flex-wrap">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+<span class="font-bold">Jueves, 24 Octubre</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<span class="font-bold">16:00 - 18:00</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">groups</span>
+<span class="font-body-md">Grupo "Los Navier-Stokes"</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Location/Meet -->
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center justify-between group hover:bg-primary-fixed transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">video_camera_front</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-outline">MODALIDAD</p>
+<p class="font-bold text-on-surface">Online (Google Meet)</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">open_in_new</span>
+</div>
+<!-- Weather Widget -->
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-status-avoid/10 flex items-center justify-center text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined">wb_sunny</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-outline">CLIMA PREVISTO</p>
+<p class="font-bold text-on-surface">Despejado, 22°C</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Campus Norte</span>
+</div>
+</div>
+<div class="mt-6 flex flex-wrap gap-4">
+<button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-bold flex items-center gap-2 shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined">event_available</span>
+                            Agregar a Calendar
+                        </button>
+<button class="bg-surface-container-highest text-on-surface px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">share</span>
+                            Compartir invitación
+                        </button>
+</div>
+</div>
+<!-- Content Bento -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Tasks/Checklist -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-border-subtle">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">task_alt</span>
+                                Tareas del Grupo
+                            </h3>
+<span class="bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded text-label-sm">2/4</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg opacity-60">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="line-through">Subir guía de ejercicios</span>
+</li>
+<li class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg opacity-60">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="line-through">Confirmar sala de Meet</span>
+</li>
+<li class="flex items-center gap-3 p-3 bg-white border border-border-subtle rounded-lg hover:border-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
+<span>Traer dudas de integrales triples</span>
+</li>
+<li class="flex items-center gap-3 p-3 bg-white border border-border-subtle rounded-lg hover:border-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
+<span>Revisar examen año anterior</span>
+</li>
+</ul>
+<button class="mt-4 w-full py-2 border-2 border-dashed border-outline-variant text-outline rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">add</span>
+                            Nueva tarea
+                        </button>
+</div>
+<!-- Map/Location -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-border-subtle overflow-hidden flex flex-col">
+<h3 class="font-headline-md text-headline-md mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">location_on</span>
+                            Punto de Encuentro
+                        </h3>
+<div class="flex-grow rounded-lg overflow-hidden relative min-h-[200px]">
+<img alt="Map" class="w-full h-full object-cover" data-alt="A clean, minimalist digital map visualization with a modern UI style. The map shows a college campus with bright blue highlights on key buildings and pathways. A prominent primary blue location pin indicates the meeting spot. The aesthetic is professional and high-tech, using the brand's blue and gray color palette." data-location="Madrid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcmXFNTK-ZZRkJbZg0dGHbMsY7noTJl_5Jms3tRzvYESCOHKmQ9U5TIUu4QlGSVPtyqhU7xzKRUia7m7fhfpxcn-wpS6TyquefOTJNAEJcMynMwq76cQF6pNIWOE8tNfDWYFc2lN62mSW34VPbuNuMm3Dsz3_jDerFidnq8CmsnuviB8COf5mMgZE7-Mt3fewxIET69EDnds0471UlTS0GskEa4p6TO8T_sHLmC82PreyzbszZkgPHm9_Vv4WQcsv2rTidCDOIRng"/>
+<div class="absolute bottom-3 left-3 right-3 glass-card p-3 rounded-lg flex items-center justify-between">
+<span class="text-label-sm font-medium">Biblioteca Central - Piso 2</span>
+<button class="text-primary font-bold text-label-sm">Cómo llegar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar Chat -->
+<div class="lg:col-span-4 h-fit sticky top-24">
+<div class="bg-surface-container-lowest rounded-xl shadow-lg border border-border-subtle flex flex-col max-h-[calc(100vh-120px)]">
+<div class="p-4 border-b border-border-subtle flex items-center justify-between bg-primary-container text-on-primary-container rounded-t-xl">
+<div class="flex items-center gap-3">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Profile of a young female student, brightly lit, professional corporate style with soft blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8SEHi1mvTm7cxI9BBPdv6en63Rqv2ZfB_SaXNGNXvqoWDHAZdwWCDgKmWVclbcKbyiJbqsnJ0X5IH04mhQo95QDacl-Mwdl-ro-gDIl3V3QEkVYcWvfxsHC0KxyIaAc-1R4jBGQ-bcySOWQeFHnQM2rhOcTCAVjqDJAOgzWCSzehEXDNZItoL_ZjyAhqW3ifjCaOXoANdO-7nHFktOuwnpmB4f-VWsFsPrDqUYM7mQZUf-KI5_SJFnNH0lgG2qLTzK_x5huXxBYA"/>
+<img class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Profile of a young male student with glasses, studio lighting, clean and professional look with brand colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW9hZMZQzGL9W01tlQZRrgCy57TLyjIF9tWAKxBU2ZJjJmXbTbCPTv3WFA6zzd7EN-9yiT122sUiLh1yFaGaL5sAFyOsEBzWqGWJ-fbPpajfpnIxEPi4XBZWgCilRKVOY46FRXVwWFMHk4F2jNwo69_KjMVo7Qhh29UFAkg82bcC7jWltww1m0-yDZ4-xDTIgz0X8PoZBSehQ3Yl3-_yiZAi0YWAfPpxaX1WCnTwMmpu0cI8hd6dPOOAGjzyqVGdAbVZjpPD8KaNA"/>
+<div class="w-8 h-8 rounded-full border-2 border-primary-container bg-secondary-container flex items-center justify-center text-[10px] font-bold">+5</div>
+</div>
+<div>
+<h4 class="font-bold leading-none">Chat de Grupo</h4>
+<span class="text-[10px] opacity-80 uppercase tracking-widest">3 activos ahora</span>
+</div>
+</div>
+<button class="material-symbols-outlined">more_vert</button>
+</div>
+<div class="flex-grow p-4 space-y-4 overflow-y-auto bg-surface-container-lowest">
+<!-- Message -->
+<div class="flex flex-col gap-1 items-start">
+<span class="text-[10px] text-outline ml-2">Sofia • 10:45</span>
+<div class="bg-surface-container-high p-3 rounded-2xl rounded-tl-none max-w-[85%] text-body-md">
+                                ¿Alguien tiene el PDF de la guía 3? No lo encuentro en el Drive.
+                            </div>
+</div>
+<!-- Message -->
+<div class="flex flex-col gap-1 items-end">
+<span class="text-[10px] text-outline mr-2">Tú • 11:02</span>
+<div class="bg-primary text-on-primary p-3 rounded-2xl rounded-tr-none max-w-[85%] text-body-md shadow-sm">
+                                Lo subo ahora mismo a la sección de archivos. 👍
+                            </div>
+</div>
+<!-- Message -->
+<div class="flex flex-col gap-1 items-start">
+<span class="text-[10px] text-outline ml-2">Marco • 11:15</span>
+<div class="bg-surface-container-high p-3 rounded-2xl rounded-tl-none max-w-[85%] text-body-md">
+                                ¡Gracias! Acabo de confirmar mi asistencia. Nos vemos mañana.
+                            </div>
+</div>
+</div>
+<div class="p-4 border-t border-border-subtle bg-surface-container-low rounded-b-xl">
+<div class="relative flex items-center">
+<input class="w-full pl-4 pr-12 py-3 bg-white border border-border-subtle rounded-full focus:ring-2 focus:ring-primary focus:border-primary outline-none text-body-md" placeholder="Escribe un mensaje..." type="text"/>
+<button class="absolute right-2 p-2 bg-primary text-on-primary rounded-full hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-surface-container-high shadow-[0_-2px_10px_rgba(0,0,0,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-sm text-label-sm">Mi Horario</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm">Mis Grupos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-sm text-label-sm">Alertas</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for task checklist
+        document.querySelectorAll('li.cursor-pointer').forEach(item => {
+            item.addEventListener('click', function() {
+                const icon = this.querySelector('.material-symbols-outlined');
+                const text = this.querySelector('span:not(.material-symbols-outlined)');
+                
+                if (icon.textContent === 'check_box_outline_blank') {
+                    icon.textContent = 'check_box';
+                    icon.classList.remove('text-outline');
+                    icon.classList.add('text-tertiary');
+                    icon.style.fontVariationSettings = "'FILL' 1";
+                    text.classList.add('line-through');
+                    this.classList.add('opacity-60');
+                } else {
+                    icon.textContent = 'check_box_outline_blank';
+                    icon.classList.add('text-outline');
+                    icon.classList.remove('text-tertiary');
+                    icon.style.fontVariationSettings = "'FILL' 0";
+                    text.classList.remove('line-through');
+                    this.classList.remove('opacity-60');
+                }
+            });
+        });
+    </script>
+</body></html>

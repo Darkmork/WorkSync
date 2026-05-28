@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Buscar Mejor Momento - Ventana Común</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "status-preferred": "#60a5fa",
+                        "on-secondary-fixed": "#001c39",
+                        "background": "#f8f9fa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "primary-container": "#2170e4",
+                        "inverse-primary": "#adc6ff",
+                        "on-surface": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#006b2c",
+                        "on-surface-variant": "#424754",
+                        "surface-dim": "#d9dadb",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-tint": "#005ac2",
+                        "surface": "#f8f9fa",
+                        "outline": "#727785",
+                        "on-secondary-fixed-variant": "#004883",
+                        "secondary-fixed": "#d4e3ff",
+                        "primary": "#0058be",
+                        "error-red": "#dc2626",
+                        "secondary": "#0060ac",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#64a8fe",
+                        "on-primary-fixed": "#001a42",
+                        "surface-container": "#edeeef",
+                        "tertiary-fixed-dim": "#62df7d",
+                        "surface-bright": "#f8f9fa",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#002109",
+                        "tertiary-container": "#00873a",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-container": "#f7fff2",
+                        "on-secondary-container": "#003c70",
+                        "on-primary-container": "#fefcff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#7ffc97",
+                        "on-error-container": "#93000a",
+                        "status-occupied": "#9ca3af",
+                        "on-tertiary-fixed-variant": "#005320",
+                        "outline-variant": "#c2c6d6",
+                        "text-secondary": "#6b7280",
+                        "status-avoid": "#fde047",
+                        "on-background": "#191c1d",
+                        "border-subtle": "#e5e7eb",
+                        "status-free": "#4ade80",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-fixed-dim": "#a4c9ff",
+                        "on-primary-fixed-variant": "#004395",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "element-gap": "12px",
+                        "unit": "4px",
+                        "grid-gap": "1px",
+                        "section-padding": "32px",
+                        "mobile-margin": "16px",
+                        "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-sm": ["JetBrains Mono"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "grid-time": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "grid-time": ["11px", {"lineHeight": "1", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mesh-gradient-bg {
+            background-color: #f8f9fa;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(33, 112, 228, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(74, 222, 128, 0.05) 0px, transparent 50%);
+        }
+        .schedule-line {
+            background: repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(0,0,0,0.03) 50px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md mesh-gradient-bg min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim shadow-sm docked full-width top-0 z-50">
+<div class="flex justify-between items-center px-mobile-margin md:px-container-margin py-unit w-full max-w-7xl mx-auto">
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">Ventana Común</h1>
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-xl font-bold hover:bg-surface-container-low transition-colors scale-98 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+                    Crear Grupo
+                </button>
+<img alt="User profile photo" class="w-10 h-10 rounded-full bg-surface-container-high" data-alt="A professional studio portrait of a young adult with a friendly expression, styled as a high-quality 3D avatar. The lighting is soft and directional, typical of a modern corporate profile photo. The background is a clean, neutral gradient of light blues and grays, maintaining a consistent modern productivity app aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAriq1nfsd1kcXeYUZciTxpC8z0DGSri6lmv7kWcM-0YvvA3sde9Sq1Ez5-Uq-e_gBLtW_Txwc14b7Ff-05U_IeVu1_fzJVV8t_1Y4QwP7ucQQ1b0HVR8GjzLTK6JPJnFCw1WbHqN9hOcFSChfnFsZiwy2ydwJeMsvOeoymc5qgBhmKHGlPizGyPiEyvijcwl3R0JUM9rWIiNPK7ohEGhsLXIwZph5d8SjTsCUijH8uFsZ0q3FRy_-G_nOxW6xBRVUSz8hmF88kHE"/>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-mobile-margin md:px-container-margin py-8">
+<div class="flex flex-col md:flex-row gap-8">
+<!-- Side Filters -->
+<aside class="w-full md:w-72 space-y-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-border-subtle">
+<h2 class="font-headline-md text-headline-md mb-6">Filtros</h2>
+<div class="space-y-6">
+<div>
+<label class="block font-label-sm text-label-sm text-outline mb-2">GRUPO SELECCIONADO</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border-none rounded-lg p-3 font-body-md focus:ring-2 focus:ring-primary appearance-none">
+<option>Proyecto Final IA</option>
+<option>Estudio Cálculo</option>
+<option>Equipo Fútbol</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-outline">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-outline mb-2">DURACIÓN MÍNIMA</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="p-2 border border-border-subtle rounded-lg text-label-sm font-label-sm hover:border-primary transition-colors">1h</button>
+<button class="p-2 border-2 border-primary bg-primary-container text-on-primary-container rounded-lg text-label-sm font-label-sm">1.5h</button>
+<button class="p-2 border border-border-subtle rounded-lg text-label-sm font-label-sm hover:border-primary transition-colors">2h</button>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-outline mb-2">FECHA LÍMITE</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg p-3 font-body-md focus:ring-2 focus:ring-primary" type="date" value="2023-10-27"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-outline mb-2">MODALIDAD</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">video_call</span> Presencial
+                                </span>
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">home_work</span> Remoto
+                                </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Group Members Preview -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-border-subtle">
+<h3 class="font-label-sm text-label-sm text-outline mb-4 uppercase tracking-wider">Miembros (5)</h3>
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A small circular avatar of a person with stylish glasses and a smile, set against a soft green background. The style is clean, modern, and friendly, consistent with a high-end social productivity tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxk8ZBw-fygPQg07k7T9QNfsj2gyeU6msFK4BLHQv049z-sPZghs0pbnPsA-Hy4vmhK5cjL41kOFPGElAVrtmYa_LBPoG7qzais57ZYMyEBOsWbkCidj0iJTQIOa9BpZCoOQcifVBVmiZw9WAZrKaH-Pyo61tVcmpH57yRWOktqIue3xOHHm-srQ_h4BUAJtkNxo9PqPpaAWIpfqQAE3Vl1I3jc8WMGLl2He27mjfXQFxoOhzunajfmgIWysaaos26BiEWlfVJSqs"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A small circular avatar of a person with long dark hair and a professional look, set against a soft blue background. The style is clean, modern, and friendly, consistent with a high-end social productivity tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCefCdkknVALAKYZk-fjCi-pSYDGRfmcG1wkLir5cNo8C7ASfs6kMBoWPbGgV6IZr98gHZvAx6GwMz45gSPd6kRuGse62JspVAnc3P36tizVa7RIhcKa2Ub6Y-lKGhgYzWN4rVsXxUW6JKOZAO1zpcJrBCC38LPQEb2f1wh-jKsxCFsNwCNdOY00AMJpBzG3swSq_fOCmpe5FBIIm7DoIc65KAENilsoPo-VaKog1ko1iN3iZRvt13lganarF-8NUfS1ZK_ZAaQvlw"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A small circular avatar of a person with a beard and a tech-focused appearance, set against a soft yellow background. The style is clean, modern, and friendly, consistent with a high-end social productivity tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuw39xQpcx6dLebHo6imjSroqtGACWqURmn0yk2btAsOxBeILWyJp5gS3SMeZ2CZ5CiIuur5HkWeYj0JRubkN-nP3YRZ3wG2dab24SSmEFdDb2HvgrTv8QztD8axuTXA5BZfrdlysYxahYzdL6r4CaTM1SrLCPq7oqFwC0KY6XaMWL0xkC5V_q1S54vk5ihd88xlyM9rsU609I6xZKyKXYsFOBH8y2GtvdO6M10GduGYkr0m-yGVjpBb5JIIARSoA_KqIuZLuPiEI"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A small circular avatar of a person with short curly hair, set against a soft purple background. The style is clean, modern, and friendly, consistent with a high-end social productivity tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkiRDqmhWobm1pb31kL2AWJeVcnLWZeT6H7pFghIassXZp6-ymiUrnFL4YyYNVoyFeW5fcXtyerh1gvpkiwFyAMoJLdI_WRX4LAvOsGv169gD6ZN-LLrl3RocIHtLi31__VZGJK1aqkAwvFLy3zeVok5V2-EPVE-n92FO1IulKYyZLLGkTksARche8aWtzxBsyL6rTqmqLPQHzg_dJ9A-AUVKHJx_BwW6qinZsi_5rcq2Lv1ArsAoDgosdhuUNiwr3biJLM0Vc1lE"/>
+<div class="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-white bg-surface-container-high text-[10px] font-bold">+1</div>
+</div>
+</div>
+</aside>
+<!-- Main Content: Recommendations -->
+<section class="flex-1 space-y-8">
+<header class="flex justify-between items-end">
+<div>
+<span class="text-primary font-bold tracking-widest text-label-sm uppercase">Algoritmo Ventana</span>
+<h2 class="text-headline-lg font-headline-lg mt-1">Mejores Momentos</h2>
+</div>
+<div class="hidden md:block bg-surface-container p-1 rounded-lg">
+<button class="px-4 py-2 bg-white rounded shadow-sm text-label-sm font-label-sm">Vista Lista</button>
+<button class="px-4 py-2 text-label-sm font-label-sm text-outline">Vista Calendario</button>
+</div>
+</header>
+<!-- Recommendation #1 (The Winner) -->
+<article class="relative bg-white rounded-xl shadow-lg border-2 border-primary overflow-hidden group transition-all hover:shadow-xl">
+<div class="absolute top-0 right-0 p-4">
+<div class="bg-status-free/20 text-tertiary px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> 100% DISPONIBLES
+                        </div>
+</div>
+<div class="flex flex-col md:flex-row">
+<!-- Left Info -->
+<div class="p-8 flex-1">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">star</span>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-primary">Opción #1: El Bloque Maestro</h3>
+<p class="font-body-md text-on-surface-variant">Martes 24 Oct • 15:30 – 17:00</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+<div class="flex items-start gap-3 p-4 bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-tertiary">bolt</span>
+<div>
+<p class="font-bold text-body-md">Máxima Eficiencia</p>
+<p class="text-label-sm text-on-surface-variant">Es el bloque más largo donde todos los miembros coinciden sin interrupciones.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-4 bg-surface-container-low rounded-lg">
+<span class="material-symbols-outlined text-secondary">history</span>
+<div>
+<p class="font-bold text-body-md">Pre-descanso</p>
+<p class="text-label-sm text-on-surface-variant">Ocurre justo después de la clase de IA, manteniendo el flujo de trabajo actual.</p>
+</div>
+</div>
+</div>
+<button class="mt-8 w-full md:w-auto bg-primary text-on-primary px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 scale-98 active:scale-95 transition-all">
+                                Agendar este momento <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Availability Graph Preview -->
+<div class="w-full md:w-64 bg-primary-container/5 p-8 border-l border-border-subtle flex flex-col justify-center items-center">
+<div class="relative w-32 h-32">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-dasharray="364.4" stroke-dashoffset="0" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-headline-md font-bold text-primary">90%</span>
+<span class="text-[10px] text-outline uppercase font-bold">Match</span>
+</div>
+</div>
+<p class="text-center text-label-sm mt-4 text-on-surface-variant">Probabilidad de éxito basada en historial</p>
+</div>
+</div>
+</article>
+<!-- Recommendation #2 & #3 -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<article class="bg-white p-6 rounded-xl shadow-sm border border-border-subtle hover:border-secondary transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-secondary-container/20 text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold">Opción #2</span>
+<span class="text-label-sm font-label-sm text-outline">80% Disponibilidad</span>
+</div>
+<h4 class="font-headline-md text-body-lg font-bold">Jueves 26 Oct</h4>
+<p class="text-primary font-bold">10:00 – 11:30</p>
+<p class="text-label-sm text-on-surface-variant mt-2">Justificación: 4/5 miembros libres. El miembro faltante (Dani) suele ser flexible en esta franja.</p>
+</article>
+<article class="bg-white p-6 rounded-xl shadow-sm border border-border-subtle hover:border-secondary transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-label-sm font-bold">Opción #3</span>
+<span class="text-label-sm font-label-sm text-outline">75% Disponibilidad</span>
+</div>
+<h4 class="font-headline-md text-body-lg font-bold">Lunes 23 Oct</h4>
+<p class="text-primary font-bold">18:00 – 19:30</p>
+<p class="text-label-sm text-on-surface-variant mt-2">Justificación: Bloque tarde-noche. Todos libres pero con baja energía reportada anteriormente.</p>
+</article>
+</div>
+<!-- Subtle Grid Background Visualization -->
+<div class="relative bg-surface-container-low rounded-xl p-8 border border-border-subtle overflow-hidden h-48">
+<div class="absolute inset-0 flex items-center justify-around opacity-10 schedule-line">
+<!-- Faked grid lines -->
+</div>
+<div class="relative z-10">
+<h4 class="text-label-sm font-label-sm text-outline uppercase mb-4">Mapa de Calor de Grupo</h4>
+<div class="flex gap-2 h-20 items-end">
+<div class="flex-1 bg-status-free/30 rounded-t-lg h-[40%]"></div>
+<div class="flex-1 bg-status-free/50 rounded-t-lg h-[60%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t-lg h-[95%] border-t-2 border-primary"></div>
+<div class="flex-1 bg-status-avoid/30 rounded-t-lg h-[30%]"></div>
+<div class="flex-1 bg-status-free/40 rounded-t-lg h-[50%]"></div>
+<div class="flex-1 bg-status-free/60 rounded-t-lg h-[70%]"></div>
+<div class="flex-1 bg-status-occupied/20 rounded-t-lg h-[10%]"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] text-outline font-label-sm">
+<span>LUN</span><span>MAR</span><span class="text-primary font-bold">MIE</span><span>JUE</span><span>VIE</span><span>SAB</span><span>DOM</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-surface-container-high shadow-[0_-2px_10px_rgba(0,0,0,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-sm text-label-sm">Mi Horario</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-full px-4 py-1 scale-98 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm">Mis Grupos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary transition-all relative" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-sm text-label-sm">Alertas</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error-red rounded-full"></span>
+</a>
+</nav>
+<script>
+        // Simple micro-interactions for filter buttons
+        document.querySelectorAll('aside button').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.parentElement.classList.contains('grid-cols-3')) {
+                    this.parentElement.querySelectorAll('button').forEach(btn => {
+                        btn.className = 'p-2 border border-border-subtle rounded-lg text-label-sm font-label-sm hover:border-primary transition-colors';
+                    });
+                    this.className = 'p-2 border-2 border-primary bg-primary-container text-on-primary-container rounded-lg text-label-sm font-label-sm';
+                }
+            });
+        });
+
+        // Hover effect for recommendations to simulate "selecting"
+        document.querySelectorAll('article').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Schedule - WorkSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0058be",
+                        "border-subtle": "#e5e7eb",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#64a8fe",
+                        "outline-variant": "#c2c6d6",
+                        "tertiary": "#006b2c",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-bright": "#f8f9fa",
+                        "surface-tint": "#005ac2",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "tertiary-fixed": "#7ffc97",
+                        "status-occupied": "#9ca3af",
+                        "primary-container": "#2170e4",
+                        "outline": "#727785",
+                        "surface-dim": "#d9dadb",
+                        "secondary-fixed": "#d4e3ff",
+                        "on-background": "#191c1d",
+                        "surface-container-highest": "#e1e3e4",
+                        "tertiary-container": "#00873a",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#004883",
+                        "on-secondary-container": "#003c70",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-fixed-dim": "#a4c9ff",
+                        "error-red": "#dc2626",
+                        "text-secondary": "#6b7280",
+                        "on-tertiary-container": "#f7fff2",
+                        "on-surface-variant": "#424754",
+                        "status-free": "#4ade80",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error-container": "#93000a",
+                        "status-avoid": "#fde047",
+                        "surface-container-high": "#e7e8e9",
+                        "on-secondary-fixed": "#001c39",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2e3132",
+                        "on-surface": "#191c1d",
+                        "secondary": "#0060ac",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-tertiary-fixed": "#002109",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#005320",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9fa",
+                        "background": "#f8f9fa",
+                        "on-primary-container": "#fefcff",
+                        "surface-container": "#edeeef",
+                        "primary-fixed": "#d8e2ff",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#62df7d",
+                        "status-preferred": "#60a5fa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "element-gap": "12px",
+                        "container-margin": "24px",
+                        "unit": "4px",
+                        "mobile-margin": "16px",
+                        "grid-gap": "1px",
+                        "section-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "grid-time": ["JetBrains Mono"],
+                        "label-sm": ["JetBrains Mono"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "grid-time": ["11px", {"lineHeight": "1", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brush-active {
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--tw-shadow-color);
+        }
+        .schedule-cell {
+            transition: background-color 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .schedule-cell:hover {
+            filter: brightness(0.95);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e1e3e4;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c2c6d6;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-surface-container-lowest shadow-sm">
+<div class="flex justify-between items-center px-container-margin h-16 w-full max-w-[1200px] mx-auto">
+<div class="flex items-center gap-4">
+<img alt="WorkSync Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz--TOLUQhId43Kv_cGcVep884lK2mWehle9vl1QnodH5yDtvmQagaM-NNyCcA0gOySzEq8xagYt3rey-lskvMiPHoqVqIY4ZE2msJ79Bzo3PEtpR03jdl157meE1jbuPt5D2kXYN-chOFHnhcxW3cnwDC0B_LxwkWFJ0-lNISgnFmoG5gHzmukUQP4Cq6JEnP0Oj4vZ5Z_NKwurtJgI4d2Zol3OmUn_PDtVLepOCuPwp1V3jt6_OzGbQoqj-duQHHx0roSvMhKBo"/>
+<span class="font-headline-md text-headline-md font-bold text-primary">WorkSync</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Home</a>
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">My Schedule</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">My Groups</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Friends</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Alerts</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-body-md transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Create Event
+                </button>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-border-subtle hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer">
+<img alt="User profile" class="h-full w-full object-cover" data-alt="A professional headshot of a friendly university student with a warm smile, set against a blurred modern library background. The lighting is soft and natural, emphasizing a productive and corporate-but-human student identity. The overall aesthetic is clean and high-fidelity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdKba_a25WWzE-7p0meMqbmIuWA2cU1NjN8Fg1B4VmckNnnXDb2Qy2VtSVqYFCOEZ_dI2iqhV2uZvP0NRu-III4MwkQIMCQRZJZnzPiyH4KbSs1VWfBU5QcLdMAYhAvniXx14dTwpcx1d9rzwAhIRyki1T904hFjzoIf6UkMbNAMljFjbjM-W_YSf07zkXeep3OXxTgjcs4Dn4wKeCxoUc9_Ym0MDG1bU7dNUj3FZLumGX_tEfH2WrhVNk2e4pnz4MdYsLB2o6ddc"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-container-margin py-section-padding">
+<div class="flex flex-col lg:flex-row gap-8 items-start">
+<!-- Left Sidebar: Brushes & Pro Tip -->
+<aside class="w-full lg:w-64 flex flex-col gap-6 sticky top-24">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-border-subtle">
+<h2 class="font-headline-md text-body-md font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">brush</span>
+                        Brushes
+                    </h2>
+<div class="space-y-3" id="brush-palette">
+<button class="brush-btn w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-all bg-surface-container-high brush-active ring-2 ring-primary ring-offset-2" data-state="free" onclick="setBrush('free', this)">
+<span class="w-4 h-4 rounded-full bg-status-free"></span>
+<span class="font-label-sm text-label-sm">Libre</span>
+</button>
+<button class="brush-btn w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-all" data-state="preferred" onclick="setBrush('preferred', this)">
+<span class="w-4 h-4 rounded-full bg-status-preferred"></span>
+<span class="font-label-sm text-label-sm">Preferido</span>
+</button>
+<button class="brush-btn w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-all" data-state="occupied" onclick="setBrush('occupied', this)">
+<span class="w-4 h-4 rounded-full bg-status-occupied"></span>
+<span class="font-label-sm text-label-sm">Ocupado</span>
+</button>
+<button class="brush-btn w-full flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-all" data-state="avoid" onclick="setBrush('avoid', this)">
+<span class="w-4 h-4 rounded-full bg-status-avoid"></span>
+<span class="font-label-sm text-label-sm">Evitar</span>
+</button>
+</div>
+</div>
+<div class="bg-primary-container/10 p-5 rounded-xl border border-primary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 text-primary/10">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<h3 class="font-body-md font-bold text-primary mb-2">Pro Tip</h3>
+<p class="text-on-surface-variant text-label-sm font-label-sm leading-relaxed">
+                        Click and drag across the grid to "paint" your availability blocks instantly.
+                    </p>
+</div>
+<div class="flex flex-col gap-3">
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-body-md font-bold transition-transform active:scale-95 shadow-lg shadow-primary/20">
+                        Save Changes
+                    </button>
+<button class="w-full py-3 bg-surface-container-lowest text-on-surface-variant border border-border-subtle rounded-lg font-body-md transition-all hover:bg-surface-container-low">
+                        Reset Weekly
+                    </button>
+</div>
+</aside>
+<!-- Main Content: Schedule Grid -->
+<section class="flex-grow w-full">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+<!-- Grid Header: Days -->
+<div class="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border-subtle bg-surface-container-low">
+<div class="h-12 border-r border-border-subtle"></div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle last:border-0">
+<span class="text-on-surface-variant">MON</span>
+<span class="text-primary font-bold">12</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle">
+<span class="text-on-surface-variant">TUE</span>
+<span class="text-primary font-bold">13</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle">
+<span class="text-on-surface-variant">WED</span>
+<span class="text-primary font-bold">14</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle">
+<span class="text-on-surface-variant">THU</span>
+<span class="text-primary font-bold">15</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle">
+<span class="text-on-surface-variant">FRI</span>
+<span class="text-primary font-bold">16</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm border-r border-border-subtle">
+<span class="text-on-surface-variant">SAT</span>
+<span class="text-primary font-bold">17</span>
+</div>
+<div class="h-12 flex flex-col justify-center items-center font-label-sm text-label-sm">
+<span class="text-on-surface-variant">SUN</span>
+<span class="text-primary font-bold">18</span>
+</div>
+</div>
+<!-- Grid Body -->
+<div class="h-[600px] overflow-y-auto relative" id="schedule-container">
+<div class="grid grid-cols-[60px_repeat(7,1fr)] grid-rows-[repeat(15,60px)] gap-grid-gap bg-border-subtle">
+<!-- Time Column -->
+<div class="contents">
+<!-- Generated by script for cleanliness -->
+</div>
+<!-- Cells Container -->
+<div class="contents" id="grid-cells">
+<!-- Generated by script -->
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface-container-low border-t border-border-subtle">
+<div class="flex flex-col md:flex-row justify-between items-center py-section-padding px-container-margin w-full max-w-[1200px] mx-auto">
+<div class="flex flex-col gap-2">
+<span class="font-headline-md text-headline-md text-primary font-bold">WorkSync</span>
+<p class="font-label-sm text-label-sm text-text-secondary">© 2024 WorkSync. All rights reserved.</p>
+</div>
+<div class="flex gap-6 mt-6 md:mt-0">
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Support</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-text-secondary hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<script>
+        let currentBrush = 'free';
+        let isMouseDown = false;
+
+        const colorMap = {
+            'free': 'bg-status-free',
+            'preferred': 'bg-status-preferred',
+            'occupied': 'bg-status-occupied',
+            'avoid': 'bg-status-avoid',
+            'none': 'bg-surface-container-lowest'
+        };
+
+        function setBrush(type, btn) {
+            currentBrush = type;
+            document.querySelectorAll('.brush-btn').forEach(b => {
+                b.classList.remove('bg-surface-container-high', 'brush-active', 'ring-2', 'ring-primary', 'ring-offset-2');
+            });
+            btn.classList.add('bg-surface-container-high', 'brush-active', 'ring-2', 'ring-primary', 'ring-offset-2');
+        }
+
+        const gridCells = document.getElementById('grid-cells');
+        const timeColumn = gridCells.previousElementSibling;
+
+        // Populate Time Labels (7:00 to 21:00)
+        for (let h = 7; h <= 21; h++) {
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'bg-surface-container-low flex justify-center items-start pt-2 pr-2 border-r border-border-subtle';
+            timeLabel.innerHTML = `<span class="font-grid-time text-grid-time text-on-surface-variant">${h}:00</span>`;
+            timeColumn.appendChild(timeLabel);
+
+            // Populate Cells for each Day
+            for (let d = 0; d < 7; d++) {
+                const cell = document.createElement('div');
+                cell.className = 'schedule-cell bg-surface-container-lowest border-b border-r border-border-subtle';
+                
+                cell.addEventListener('mousedown', (e) => {
+                    isMouseDown = true;
+                    applyBrush(cell);
+                });
+
+                cell.addEventListener('mouseenter', () => {
+                    if (isMouseDown) applyBrush(cell);
+                });
+
+                gridCells.appendChild(cell);
+            }
+        }
+
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        function applyBrush(cell) {
+            // Remove existing bg classes
+            Object.values(colorMap).forEach(cls => cell.classList.remove(cls));
+            // Add current brush class
+            cell.classList.add(colorMap[currentBrush]);
+            
+            // Add a little pop animation
+            cell.animate([
+                { transform: 'scale(1)', opacity: 0.8 },
+                { transform: 'scale(1.02)', opacity: 1 },
+                { transform: 'scale(1)', opacity: 1 }
+            ], { duration: 200, easing: 'ease-out' });
+        }
+
+        // Initialize first brush button
+        document.querySelector('.brush-btn').click();
+    </script>
+</body></html>

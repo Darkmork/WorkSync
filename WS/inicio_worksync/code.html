@@ -1,0 +1,357 @@
+<html class="light" lang="es"><head></head><body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">```html
+
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e1e3e4",
+                    "surface": "#f8f9fa",
+                    "secondary-fixed-dim": "#a4c9ff",
+                    "on-surface-variant": "#424754",
+                    "tertiary": "#006b2c",
+                    "on-surface": "#191c1d",
+                    "on-primary-fixed": "#001a42",
+                    "surface-tint": "#005ac2",
+                    "on-secondary-container": "#003c70",
+                    "surface-container-low": "#f3f4f5",
+                    "outline": "#727785",
+                    "text-secondary": "#6b7280",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed": "#d4e3ff",
+                    "on-primary": "#ffffff",
+                    "status-preferred": "#60a5fa",
+                    "on-tertiary-fixed": "#002109",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#00873a",
+                    "secondary-container": "#64a8fe",
+                    "error-red": "#dc2626",
+                    "tertiary-fixed": "#7ffc97",
+                    "surface-container": "#edeeef",
+                    "on-secondary-fixed": "#001c39",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-background": "#191c1d",
+                    "surface-bright": "#f8f9fa",
+                    "on-secondary-fixed-variant": "#004883",
+                    "status-avoid": "#fde047",
+                    "on-error-container": "#93000a",
+                    "border-subtle": "#e5e7eb",
+                    "tertiary-fixed-dim": "#62df7d",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#fefcff",
+                    "error": "#ba1a1a",
+                    "primary-container": "#2170e4",
+                    "background": "#f8f9fa",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-tertiary-container": "#f7fff2",
+                    "status-free": "#4ade80",
+                    "on-tertiary-fixed-variant": "#005320",
+                    "inverse-surface": "#2e3132",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#c2c6d6",
+                    "inverse-primary": "#adc6ff",
+                    "primary": "#0058be",
+                    "inverse-on-surface": "#f0f1f2",
+                    "secondary": "#0060ac",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#d9dadb",
+                    "status-occupied": "#9ca3af",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary-fixed-variant": "#004395"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-margin": "24px",
+                    "unit": "4px",
+                    "section-padding": "32px",
+                    "mobile-margin": "16px",
+                    "element-gap": "12px",
+                    "grid-gap": "1px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "grid-time": ["JetBrains Mono"],
+                    "label-sm": ["JetBrains Mono"],
+                    "headline-lg-mobile": ["Hanken Grotesk"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim shadow-sm docked full-width top-0 sticky z-40">
+<div class="flex justify-between items-center px-mobile-margin md:px-container-margin py-unit w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<div class="flex items-center h-12">
+<img alt="WorkSync Logo" class="h-8 md:h-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdBW4u6ReGvfdWe9q1r1CcsmZnceIDH_xd2t_SLvqCyioJZf3cUn6VCiU_FuWoYo31w74s0xWhXS_8I9OHklRV9yZ227nC_8eDPqNX7vRLgM6AxDAcUA_crNdjHuS4qfm8QKY_RlRkw95y675t3Y3gY5Oepzjr7fghhddF8YHF8ggV0HliCLClJ0XkiAn_L7MI8mbISX_RynEFn4VkN63jqhRWhCe7xlxcdxLDBYO47QxBxCVYb4C8A8EskZWHayDUTsH11a_M4Nw"/>
+</div>
+<nav class="hidden md:flex gap-6 ml-8">
+<a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md py-2" href="#">Inicio</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors font-body-md text-body-md py-2 px-2 rounded-lg" href="#">Mi Horario</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors font-body-md text-body-md py-2 px-2 rounded-lg" href="#">Mis Grupos</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="hidden md:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-xl scale-98 active:scale-95 transition-transform font-body-md text-body-md">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    Crear Grupo
+                </button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="User profile photo" data-alt="A high-quality professional headshot of a friendly university student with a warm smile, set against a blurred academic background. The lighting is soft and natural, emphasizing a productive yet human atmosphere. The overall aesthetic is clean and modern, consistent with a contemporary digital workspace platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW96Pw2CgcVV-W1nbeV1lcwYVXtVtF7oQE3koX_JS3UWWh3fvHd-hRJeCmw_rR0-KnpD39hL_HVck_yax573dpP83SBkRG2hve29wCNz6AuEVD3h4My3KEYNZq5Pl9Rv2y2MVz2vYyDuEjGdMzYSrbQFiBBfiTyRiGTk_SoWJ-TISVpGl82ftcffT38JdbD18LPQyNaFdb0wsEc7TFbDLPV-6VBEiB6Kf1dRfgNycACCWO01bCGWi2ebp3JI703tY7xnyiGZg_Kig"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-mobile-margin md:px-container-margin py-8">
+<!-- Saludo Personalizado -->
+<section class="mb-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg md:text-headline-lg hidden md:block">¡Hola de nuevo, Mateo! 👋</h2>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:hidden">¡Hola, Mateo! 👋</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">Hoy es lunes, 23 de octubre. Tienes un día productivo por delante.</p>
+</div>
+<!-- Clima del día -->
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center gap-4 shadow-sm">
+<div class="text-primary">
+<span class="material-symbols-outlined text-4xl" data-icon="partly_cloudy_day">partly_cloudy_day</span>
+</div>
+<div>
+<div class="font-bold font-headline-md text-headline-md leading-none">24°C</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Parcialmente nublado • CDMX</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Google Calendar Section (Left/Center) -->
+<div class="md:col-span-8 space-y-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-border-subtle">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_month">calendar_month</span>
+<h3 class="font-headline-md text-headline-md">Próximas citas</h3>
+</div>
+<button class="text-primary font-label-sm text-label-sm hover:underline">Ver calendario completo</button>
+</div>
+<div class="space-y-3">
+<!-- Event Card 1 -->
+<div class="flex items-start gap-4 p-4 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer border-l-4 border-status-preferred">
+<div class="flex flex-col items-center justify-center min-w-[60px] py-1 bg-surface-container-lowest rounded-lg">
+<span class="font-label-sm text-label-sm text-primary uppercase">OCT</span>
+<span class="font-headline-md text-headline-md">23</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<h4 class="font-body-md text-body-md font-bold">Proyecto de Diseño UI/UX</h4>
+<span class="text-label-sm font-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full">Reunión</span>
+</div>
+<div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-on-surface-variant font-body-md text-body-md opacity-80">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                                        10:00 AM - 11:30 AM
+                                    </div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+                                        Biblioteca Central - Sala 4
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Event Card 2 -->
+<div class="flex items-start gap-4 p-4 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors group cursor-pointer border-l-4 border-status-free">
+<div class="flex flex-col items-center justify-center min-w-[60px] py-1 bg-surface-container-lowest rounded-lg">
+<span class="font-label-sm text-label-sm text-primary uppercase">OCT</span>
+<span class="font-headline-md text-headline-md">23</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start">
+<h4 class="font-body-md text-body-md font-bold">Asesoría de Algoritmos</h4>
+<span class="text-label-sm font-label-sm bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded-full">Académico</span>
+</div>
+<div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-on-surface-variant font-body-md text-body-md opacity-80">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+<span class="underline">meet.google.com/abc-defg-hij</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                                        02:00 PM - 03:00 PM
+                                    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Access / Acceso Rápido -->
+<div class="grid grid-cols-2 gap-4">
+<a class="group relative overflow-hidden bg-primary text-on-primary p-6 rounded-xl transition-all hover:shadow-lg active:scale-95" href="#">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="calendar_view_week">calendar_view_week</span>
+<h3 class="font-headline-md text-headline-md">Mi Horario</h3>
+<p class="text-on-primary/80 font-body-md text-body-md">Gestiona tu disponibilidad personal.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl" data-icon="schedule">schedule</span>
+</div>
+</a>
+<a class="group relative overflow-hidden bg-secondary text-on-secondary p-6 rounded-xl transition-all hover:shadow-lg active:scale-95" href="#">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="groups">groups</span>
+<h3 class="font-headline-md text-headline-md">Mis Grupos</h3>
+<p class="text-on-secondary/80 font-body-md text-body-md">Coordina con tus equipos de estudio.</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl" data-icon="diversity_3">diversity_3</span>
+</div>
+</a>
+</div>
+</div>
+<!-- To-Do List & Side Info (Right) -->
+<div class="md:col-span-4 space-y-6">
+<!-- To-Do Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-border-subtle h-full flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="checklist">checklist</span>
+<h3 class="font-headline-md text-headline-md">Lista de Tareas</h3>
+</div>
+</div>
+<div class="space-y-4 flex-grow" id="todo-container">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition-colors group">
+<input class="w-5 h-5 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md flex-grow">Enviar avance de tesis</span>
+<button class="opacity-0 group-hover:opacity-100 text-outline hover:text-error transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition-colors group">
+<input class="w-5 h-5 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md flex-grow">Comprar café para la oficina</span>
+<button class="opacity-0 group-hover:opacity-100 text-outline hover:text-error transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition-colors group">
+<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md flex-grow line-through text-outline">Revisar correo de coordinación</span>
+<button class="opacity-0 group-hover:opacity-100 text-outline hover:text-error transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-border-subtle">
+<div class="flex gap-2">
+<input class="flex-grow bg-surface-container border-none rounded-lg focus:ring-2 focus:ring-primary font-body-md text-body-md px-4 py-2" id="todo-input" placeholder="Nueva tarea..." type="text"/>
+<button class="bg-primary-container text-on-primary-container p-2 rounded-lg hover:brightness-95 transition-all" onclick="addTodo()">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Weather Suggestion / Contextual Hint -->
+<div class="bg-tertiary-container text-on-tertiary-container p-5 rounded-xl">
+<div class="flex gap-3">
+<span class="material-symbols-outlined" data-icon="tips_and_updates">tips_and_updates</span>
+<div>
+<p class="font-bold font-body-md text-body-md mb-1">Tip de WorkSync</p>
+<p class="font-label-sm text-label-sm opacity-90">Parece que tu grupo de "Tesis" tiene un hueco libre a las 5:00 PM. ¿Quieres proponer una reunión rápida?</p>
+<button class="mt-3 text-label-sm font-label-sm font-bold underline">Propiciar encuentro</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-surface-container-high shadow-[0_-2px_10px_rgba(0,0,0,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-full px-4 py-1 scale-98 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Inicio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary dark:hover:text-primary-fixed scale-98 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-sm text-label-sm">Mi Horario</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary dark:hover:text-primary-fixed scale-98 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-sm text-label-sm">Mis Grupos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 hover:text-primary dark:hover:text-primary-fixed scale-98 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-label-sm text-label-sm">Alertas</span>
+</a>
+</nav>
+<script>
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const container = document.getElementById('todo-container');
+            
+            if (input.value.trim() !== '') {
+                const todoDiv = document.createElement('div');
+                todoDiv.className = 'flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition-colors group';
+                todoDiv.innerHTML = `
+                    <input type="checkbox" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary">
+                    <span class="font-body-md text-body-md flex-grow">${input.value}</span>
+                    <button onclick="this.parentElement.remove()" class="opacity-0 group-hover:opacity-100 text-outline hover:text-error transition-opacity">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                `;
+                container.appendChild(todoDiv);
+                input.value = '';
+
+                // Add simple event listener for checking
+                const checkbox = todoDiv.querySelector('input');
+                const span = todoDiv.querySelector('span');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        span.classList.add('line-through', 'text-outline');
+                    } else {
+                        span.classList.remove('line-through', 'text-outline');
+                    }
+                });
+            }
+        }
+
+        // Initialize checkboxes for existing items
+        document.querySelectorAll('#todo-container input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const span = e.target.nextElementSibling;
+                if (e.target.checked) {
+                    span.classList.add('line-through', 'text-outline');
+                } else {
+                    span.classList.remove('line-through', 'text-outline');
+                }
+            });
+        });
+
+        // Add task on Enter key
+        document.getElementById('todo-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTodo();
+        });
+    </script>
+```</body></html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        @media (min-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "status-preferred": "#60a5fa",
+                    "on-secondary-fixed": "#001c39",
+                    "background": "#f8f9fa",
+                    "inverse-on-surface": "#f0f1f2",
+                    "primary-container": "#2170e4",
+                    "inverse-primary": "#adc6ff",
+                    "on-surface": "#191c1d",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#006b2c",
+                    "on-surface-variant": "#424754",
+                    "surface-dim": "#d9dadb",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-tint": "#005ac2",
+                    "surface": "#f8f9fa",
+                    "outline": "#727785",
+                    "on-secondary-fixed-variant": "#004883",
+                    "secondary-fixed": "#d4e3ff",
+                    "primary": "#0058be",
+                    "error-red": "#dc2626",
+                    "secondary": "#0060ac",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#64a8fe",
+                    "on-primary-fixed": "#001a42",
+                    "surface-container": "#edeeef",
+                    "tertiary-fixed-dim": "#62df7d",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#002109",
+                    "tertiary-container": "#00873a",
+                    "inverse-surface": "#2e3132",
+                    "on-tertiary-container": "#f7fff2",
+                    "on-secondary-container": "#003c70",
+                    "on-primary-container": "#fefcff",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#7ffc97",
+                    "on-error-container": "#93000a",
+                    "status-occupied": "#9ca3af",
+                    "on-tertiary-fixed-variant": "#005320",
+                    "outline-variant": "#c2c6d6",
+                    "text-secondary": "#6b7280",
+                    "status-avoid": "#fde047",
+                    "on-background": "#191c1d",
+                    "border-subtle": "#e5e7eb",
+                    "status-free": "#4ade80",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed-dim": "#a4c9ff",
+                    "on-primary-fixed-variant": "#004395",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "element-gap": "12px",
+                    "unit": "4px",
+                    "grid-gap": "1px",
+                    "section-padding": "32px",
+                    "mobile-margin": "16px",
+                    "container-margin": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-sm": ["JetBrains Mono"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "grid-time": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "grid-time": ["11px", {"lineHeight": "1.1", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim shadow-sm docked full-width top-0 sticky z-40 transition-all">
+<div class="flex justify-between items-center px-mobile-margin md:px-container-margin py-unit w-full max-w-7xl mx-auto h-16">
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">
+                Ventana Común
+            </div>
+<nav class="hidden md:flex gap-8 items-center h-full">
+<a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Mi Horario</a>
+<a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md px-3 py-2" href="#">Mis Grupos</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Amigos</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Alertas</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-xl font-body-md text-body-md flex items-center gap-2 scale-98 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="add_circle">add_circle</span>
+<span class="hidden sm:inline">Crear Grupo</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-outline-variant">
+<img alt="User profile photo" data-alt="A professional close-up studio portrait of a friendly young college student with a bright smile. The lighting is soft and natural, coming from a large window in a modern library. The background is softly blurred showing hints of books and wooden furniture, maintaining a light and airy aesthetic consistent with a modern student productivity app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0mI2OX0nczUhfVQDdANil2UAbKY1PADmYRxJFfm1E2M7vnEREhaGWgBuCDiEdAbEW82BzyZfbPqzRywt0_2LFUYjh0VCx9KYDPo5Q7kQKQbdwGmkS2FXStrqGBaOBMc7yS8_YMRmSjDy_XOnw6CKypGNCHM_Mzx1086yoVzI3tX-5izZEjLTSTjvsyLHBdmi2R3Y6gu-uU10neTUDCUpKqDlY3Idnbxi1GJQHgIVE-JdRF0ayroIPV3GLtKDRXSsIOC7RJfg89xA"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-mobile-margin md:px-container-margin py-8">
+<!-- Dashboard Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Mis Grupos</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Gestiona tus equipos y coordina horarios de manera eficiente.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                    Filtrar
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="sort">sort</span>
+                    Ordenar
+                </button>
+</div>
+</div>
+<!-- Groups Grid (Bento Style) -->
+<div class="bento-grid">
+<!-- Card 1: Proyecto Matemática -->
+<div class="glass-card rounded-xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer border-l-4 border-primary">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary-container/10 rounded-lg text-primary">
+<span class="material-symbols-outlined text-[28px]" data-icon="calculate">calculate</span>
+</div>
+<span class="bg-status-free/20 text-tertiary px-3 py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-free animate-pulse"></span>
+                        Activo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 group-hover:text-primary transition-colors">Proyecto Matemática</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Entrega final: Análisis de Fourier y señales.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-3">
+<img alt="Member 1" class="w-8 h-8 rounded-full border-2 border-white" data-alt="A small circular avatar of a young woman with glasses, smiling warmly, looking at the camera. The background is a soft blue gradient. High-key lighting, modern digital art style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvleDH6gBG-WEL2w11LQdDVYNIWJyFsZLEugGr5l72uCHMXFzGpDniOvkcbCfIaOMaj5nc_U8qCQPhRoJ1HYIap4kL5EjoYovYomIlDXkAaP75oCIE1tZEGP8nNWIC2awbUhSTT3PmbzBUb9ZVyWqDPiFnQDVZRhxoYDIbVmalPPaRZXSa5N_GiGVLhuh299-yZkTUiHew6Jv4AuLtBdTdHebReY2j-HrxJMwj7jsLk_XHDNnhVmqOA1wHfVXFRWApu1uaDKHJGq8"/>
+<img alt="Member 2" class="w-8 h-8 rounded-full border-2 border-white" data-alt="A small circular avatar of a young man with a creative haircut, looking thoughtfully into the distance. Clean, minimalist studio lighting with a neutral gray background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOZskzbKY26QhEDMKgYQDzVdIsEdtWIp02WfoR09Is1Vr6lXDnsXjjjHssmtrsxUuUCVNBbVOtag8IcWM1CVrYNRkiVUX63ifC4TNrFF25JYxXsegHB2X9D7Lt2QiTs_b5ApZvIUy9XZdHfV3fonsxde5FdrXN-CnSw8AO29AoQ2JBBy8x3GcBf0sE8IeNyNS__IctzmCinxzal2pacjN7xqFxV9lcRiOmQci798x87n-9x7Fd_FE5dfbeQEOWMLEvoaH0FP5I1QE"/>
+<img alt="Member 3" class="w-8 h-8 rounded-full border-2 border-white" data-alt="A small circular avatar of a cheerful student with curly hair. The lighting is bright and optimistic, with a soft peach background. High quality digital portrait." src="https://lh3.googleusercontent.com/aida-public/AB6AXuACfBh_xaLr_tRCnXm1zMeu3kAeaBjrR_6dDpYnu071zrMy_v9eXQSkRUy751JnPgQArEA_xKxK3g8oaJu9SXF3AY1vu6u7J34QVC1yaZfU42WnepVXa3dAy2tZXGULmQWQKiBpouCoiqHtu3wiACO0_PyUxYitlvHzKOMWCYtH7gD0D6SFbwbPJHnvptiK5edc1A4pWhb_xL4CE3NkqNbo0cphrPqv3NgoWmjHicn6DZkBQ9S71MazdqnJqWvEZlAR76KpVX6ZF_I"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm text-on-surface-variant">
+                            +2
+                        </div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="groups">groups</span>
+                        5 integrantes
+                    </div>
+</div>
+</div>
+<!-- Card 2: Grupo de Estudio -->
+<div class="glass-card rounded-xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer border-l-4 border-secondary">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-secondary-container/10 rounded-lg text-secondary">
+<span class="material-symbols-outlined text-[28px]" data-icon="menu_book">menu_book</span>
+</div>
+<span class="bg-status-avoid/20 text-on-secondary-fixed-variant px-3 py-1 rounded-full font-label-sm text-label-sm">
+                        Pendiente
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 group-hover:text-secondary transition-colors">Grupo de Estudio</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Preparación para el examen parcial de Física II.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-3">
+<img alt="Member 1" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Close up avatar of a young man with a beard and a friendly expression. Soft daylight lighting, studio setting. Modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAluQDbngIU-OTnYTvmNhH5rndgn5mbaqCkIzA47Ta_rxXk9C9BgczM_VIuAnTuD5kAdLZmxDO8J-q303048-asjhNE2QjibkhTNnwbZzceTH3ye_X-Z9-ImH6s7iZ5XXMt-fP96lTp9LTdQian3LmACeY0MzdTnCdMNd-3TjSKho9lAtEUzKyJKXvP0B6_UHU-_gw67HCHuqGATFb02IGczzpq3xr8DmU5mNyk64FZBW6eBNFKRJb08bETIIqczEGbX-7wjqxcwp8"/>
+<img alt="Member 2" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Close up avatar of a smiling woman with her hair in a bun. Bright, high-contrast studio lighting, clean background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8Qi3o5zaqCR4P53QjXnI7hKT7dp8bJzIA2Am_AZc7g52Rvkw9xtqdLebltNU0TbHC2aRpSV5lWFBrEL7--FfY9Vil05TKukq6CIrwho9cbCOrEEWqTWyGx5zWFlusyjMzLsjtpsPFia9TZH8KmhwbCWS24KzE9Mh4zKYIyHwZOWNqr5Q3YE1IG6gs9AZA7Pw33JyoEQkQ8P7pcfVmkkivtTjb7CdvUJqBhm-dFCux8Yhb4f9wOmlzvv2WgoEiOPk8XUBuCH6FtSo"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm text-on-surface-variant">
+                            +1
+                        </div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="groups">groups</span>
+                        3 integrantes
+                    </div>
+</div>
+</div>
+<!-- Card 3: Equipo de Fútbol -->
+<div class="glass-card rounded-xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer border-l-4 border-tertiary">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-tertiary/10 rounded-lg text-tertiary">
+<span class="material-symbols-outlined text-[28px]" data-icon="sports_soccer">sports_soccer</span>
+</div>
+<span class="bg-status-free/20 text-tertiary px-3 py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-free"></span>
+                        Hoy 18:00
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 group-hover:text-tertiary transition-colors">Equipo de Fútbol</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Entrenamiento semanal y coordinación de partidos.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-3">
+<img alt="Member 1" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Avatar of a sporty young man in a training shirt. Outdoor lighting, vibrant and energetic mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXmFi0TO4uXqObC5VXDtVljd-DF_b6Wx6E8xf11PIkYpFw_Y_5h1euLIyXOhkvFIjfnlbALFmm00nH-jnYDM9DJ1VHS4GXs4AeDp3oC-9LPksGEYTT-hpgXhBMsbGxgzUELGSbFlhONe70vmkyU1OThqymnQKjc_vyAXJXG52EomdVHsR_vwD2qvp_PpPbunf71m4d34OiHJ5Cnj6a7i2sKylrB8PhJRIRvep_9Ax86bz_YiGSdT-16LQGkYqgB_NO9mA_oYnLlHc"/>
+<img alt="Member 2" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Avatar of a focused athlete looking at the camera. Professional lighting, dynamic background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBL7i6g7i82b6exBlmnHr-0_W5ORKaxzOKZ11veQCc9WenXkkXGjY2xLNncxRgykbk5eA0-ledxRTFakk6dQkl88hHeIQ9OrHGWnYrwxW6CC4W-6d8isb6z1ZQfoU6alD3PhBus8kQ-SOf98Zw2L0MknNA0n0L-R0Y0yqAoFHgQBOuGxrNzUMS-UI6o9eEVHuJLE5bRTGWarT3cIkipDuN1WnZv7Bj3bsVZQNiBEyxqUV1ketsLQ4NQ6veiN3UBkhcWgmvfKLbDcI"/>
+<img alt="Member 3" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Avatar of a happy man with a headscarf. Warm, sunset lighting, clean composition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCVsTKjA2OBTor2ma8JAs7RmKwGz9ONfIs5z9b4Y0J__AoTT5ILvU64ly6bad6u8tQ77pR_DcerXAdgnegegLuZijgCpoJnJLhbbtNSgee74eoUl9CaCOAL1spdoCs9QfBK0K0lZ6NOt4d5Yir9dhunAoepMH1_O7vKdMpcUnwEk7mFhFnKM2DBd_2M-z8oxeo_M-wcNoWQ2UW5-aK2VZFd4HUaUZN4QkaBNQN5qUwX1FY6BPM552Hga4N2RCSFigjHIWTvtXO66c"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm text-on-surface-variant">
+                            +7
+                        </div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="groups">groups</span>
+                        10 integrantes
+                    </div>
+</div>
+</div>
+<!-- Card 4: Laboratorio Química -->
+<div class="glass-card rounded-xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer border-l-4 border-primary">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary-container/10 rounded-lg text-primary">
+<span class="material-symbols-outlined text-[28px]" data-icon="science">science</span>
+</div>
+<span class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full font-label-sm text-label-sm">
+                        Inactivo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 group-hover:text-primary transition-colors">Laboratorio Química</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Informes de experimentos y prácticas de campo.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-3">
+<img alt="Member 1" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Close up of a female student in a white lab coat. Clean white lighting, professional scientific setting. Modern, crisp digital style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi1M8t9Vs8RVB7B3MUDnOVOHUc0YXplthla9weGwOcjILO5PF4ex3NWT9umr9I20Pp8JxfnJFsOq7zOTeC4NlS839M_oMX5QO3Q91QR6PCJPszJGOGP_cRKzOlK0JBJhiF7ihKK37pqx_zSWi8ylrgEHpoYdH9JX-vMetYS5z3PctEzNx_lBtJOhCi7TGbKzL7SvczFzTBN8A7wGLTKsYoykM2JNqos44qBGw165zkmqEiBh40fgpUqgCB0Z2A1sB9iGEgeuQUiEI"/>
+<img alt="Member 2" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Close up of a male student wearing protective glasses. Blueish lighting, clean background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9n1nk-YYCSIbpf9DqIot69tBrIE78sS0qqrIbqFYV8IfbVz2hKvozvgVzJ0uGYlRrie9PbrLY7DnlXVXzRq-Z0gsZNh4IgBigzG3o78k5okx6PLMhCwVmDKHYh0xdgo6MKGdowEIKiuB-SbFQ5vdmZUDgrY1DLyvpZ5WwWDLV73wGb8vOO4SfYTqoGXiuRPMIhghBvzgJXQ3EH-Soi3g9G3SXUY2UKlS2x9jVxAebXNVgNTkRCdBS3urmx7KzLtAtnvffY3hycHo"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm text-on-surface-variant">
+                            +1
+                        </div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="groups">groups</span>
+                        3 integrantes
+                    </div>
+</div>
+</div>
+<!-- Empty State / New Group CTA -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-surface-container-low hover:border-primary transition-all cursor-pointer group h-full min-h-[220px]">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">Unirse a un grupo</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Escanea un código QR o introduce un código de invitación.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface-container-lowest dark:bg-surface-container-high shadow-[0_-2px_10px_rgba(0,0,0,0.04)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 transition-all">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-sm text-label-sm">Mi Horario</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-full px-4 py-1 transition-all">
+<span class="material-symbols-outlined" data-icon="groups" style="font-variation-settings: 'FILL' 1;">groups</span>
+<span class="font-label-sm text-label-sm">Mis Grupos</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 transition-all">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+<span class="font-label-sm text-label-sm">Amigos</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline p-2 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-label-sm text-label-sm">Alertas</span>
+</button>
+</nav>
+<script>
+        // Simple scale interaction for cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>
