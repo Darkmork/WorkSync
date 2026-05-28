@@ -8,15 +8,16 @@ const stateWeight: Record<ScheduleBlock["state"], number> = {
   occupied: -24,
 };
 
-const dayDate: Record<DayKey, string> = {
-  mon: "Lunes 23 Oct",
-  tue: "Martes 24 Oct",
-  wed: "Miercoles 25 Oct",
-  thu: "Jueves 26 Oct",
-  fri: "Viernes 27 Oct",
-  sat: "Sabado 28 Oct",
-  sun: "Domingo 29 Oct",
-};
+const dayNames = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+const monthAbbr = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const dayKeyToWeekday: Record<DayKey, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+
+function nextDateLabel(day: DayKey, from = new Date()): string {
+  const diff = (dayKeyToWeekday[day] - from.getDay() + 7) % 7;
+  const date = new Date(from);
+  date.setDate(from.getDate() + diff);
+  return `${dayNames[date.getDay()]} ${date.getDate()} ${monthAbbr[date.getMonth()]}`;
+}
 
 const endForWindow = (start: string, durationBlocks: number) => {
   const index = timeSlots.findIndex((slot) => slot.start === start);
@@ -38,26 +39,26 @@ export function buildRecommendations(
   const candidates: Recommendation[] = [];
 
   for (const day of days.slice(0, 5)) {
-    for (const slot of timeSlots.slice(1, -(durationHours - 1 || 1))) {
-      const hour = slot.start;
-      const slotIndex = timeSlots.findIndex((item) => item.start === hour);
+    for (let slotIndex = 0; slotIndex + durationHours <= timeSlots.length; slotIndex += 1) {
       const windowSlots = timeSlots.slice(slotIndex, slotIndex + durationHours);
-      if (windowSlots.length < durationHours || windowSlots.some((item) => item.kind === "lunch")) continue;
-      const windowHours = windowSlots.map((item) => item.start);
-      const memberScores = groupSchedules.map((schedule) => {
-        const blocks = windowHours.map((windowHour) => blockFor(schedule, day.key, windowHour));
-        return blocks.reduce((sum, block) => sum + (block ? stateWeight[block.state] : 0), 0);
-      });
+      if (windowSlots.some((slot) => slot.kind === "lunch")) continue;
+
+      const hour = windowSlots[0].start;
+      const windowHours = windowSlots.map((slot) => slot.start);
+      const memberScores = groupSchedules.map((schedule) =>
+        windowHours.reduce((sum, windowHour) => {
+          const block = blockFor(schedule, day.key, windowHour);
+          return sum + (block ? stateWeight[block.state] : 0);
+        }, 0),
+      );
       const availableCount = memberScores.filter((score) => score > 0).length;
       const preferredCount = groupSchedules.filter((schedule) =>
         windowHours.some((windowHour) => blockFor(schedule, day.key, windowHour)?.state === "preferred"),
       ).length;
-      const occupiedCount = groupSchedules.filter((schedule) =>
-        windowHours.some((windowHour) => blockFor(schedule, day.key, windowHour)?.state === "occupied"),
-      ).length;
-      const rawScore = memberScores.reduce((sum, score) => sum + score, 0) + preferredCount * 8 - occupiedCount * 18;
+
+      const rawScore = memberScores.reduce((sum, score) => sum + score, 0);
       const maxScore = groupSchedules.length * durationHours * stateWeight.preferred;
-      const score = Math.max(0, Math.min(99, Math.round((rawScore / maxScore) * 100)));
+      const score = Math.max(0, Math.min(100, Math.round((rawScore / maxScore) * 100)));
 
       const badges = [
         availableCount === groupSchedules.length ? "Todos disponibles" : `${availableCount}/${groupSchedules.length} disponibles`,
@@ -70,7 +71,7 @@ export function buildRecommendations(
         id: `${group.id}-${day.key}-${hour}`,
         groupId: group.id,
         day: day.key,
-        dateLabel: dayDate[day.key],
+        dateLabel: nextDateLabel(day.key),
         start: hour,
         end: endForWindow(hour, durationHours),
         score,

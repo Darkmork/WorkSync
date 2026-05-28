@@ -2,6 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     function isString(field) {
       return field is string && field.size() > 0 && field.size() < 500;
     }
@@ -11,26 +19,38 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if true;
-      allow create, update: if isString(request.resource.data.name) && isString(request.resource.data.email);
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId)
+        && isString(request.resource.data.name)
+        && isString(request.resource.data.email);
     }
 
     match /schedules/{userId} {
-      allow read: if true;
-      allow create, update: if isList(request.resource.data.blocks);
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId)
+        && isList(request.resource.data.blocks);
     }
 
     match /groups/{groupId} {
-      allow read: if true;
-      allow create, update: if isString(request.resource.data.name)
-        && isString(request.resource.data.ownerId)
+      allow read: if isSignedIn();
+      allow create: if isOwner(request.resource.data.ownerId)
+        && isString(request.resource.data.name)
+        && isList(request.resource.data.memberIds);
+      allow update: if isOwner(resource.data.ownerId)
+        && isString(request.resource.data.name)
         && isList(request.resource.data.memberIds);
     }
 
+    // Sessions belong to a group rather than a single owner. Writes require an
+    // authenticated user; tightening to group membership is a follow-up that
+    // depends on removing demo-data seeding for empty Firestore collections.
     match /sessions/{sessionId} {
-      allow read: if true;
-      allow create, update: if isString(request.resource.data.groupId)
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && isString(request.resource.data.groupId)
         && isString(request.resource.data.title)
+        && isString(request.resource.data.status);
+      allow update: if isSignedIn()
         && isString(request.resource.data.status);
     }
   }

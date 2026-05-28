@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { demoData, normalizeScheduleBlocks } from "../data/demoData";
 import type { GroupSession, ScheduleBlock, UserProfile, WorkGroup, WorkSyncData } from "../types/worksync";
 import { db, firebaseConfig, isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
@@ -41,30 +41,27 @@ export async function loadWorkSyncData(currentUserId?: string): Promise<WorkSync
     return loadPublicFirebaseData(currentUserId);
   }
 
-  const [usersSnap, groupsSnap, sessionsSnap] = await Promise.all([
+  const [usersSnap, groupsSnap, sessionsSnap, schedulesSnap] = await Promise.all([
     getDocs(collection(db, "users")),
     getDocs(collection(db, "groups")),
     getDocs(collection(db, "sessions")),
+    getDocs(collection(db, "schedules")),
   ]);
 
-  const schedulesSnap = await getDocs(collection(db, "schedules"));
-  const data = cloneDemo();
-
-  const effectiveUserId = currentUserId ?? data.currentUserId;
-  const firestoreUsers = usersSnap.docs.map((item) => ({ id: item.id, ...item.data() })) as WorkSyncData["users"];
-  const seeded = demoForUser(effectiveUserId, firestoreUsers.find((user) => user.id === effectiveUserId));
-  const loadedSchedules = schedulesSnap.empty
-    ? seeded.schedules
-    : schedulesSnap.docs.map((item) => ({ userId: item.id, ...item.data() })) as WorkSyncData["schedules"];
+  const effectiveUserId = currentUserId ?? "";
+  const users = usersSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkSyncData["users"];
+  const groups = groupsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkGroup[];
+  const sessions = sessionsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as GroupSession[];
+  const schedules = schedulesSnap.docs.map((item) => ({ ...item.data(), userId: item.id })) as WorkSyncData["schedules"];
 
   return normalizeData({
     currentUserId: effectiveUserId,
-    users: usersSnap.empty ? seeded.users : mergeUsers(seeded.users, firestoreUsers),
-    groups: groupsSnap.empty ? seeded.groups : groupsSnap.docs.map((item) => ({ id: item.id, ...item.data() })) as WorkGroup[],
-    sessions: sessionsSnap.empty ? seeded.sessions : sessionsSnap.docs.map((item) => ({ id: item.id, ...item.data() })) as GroupSession[],
-    schedules: loadedSchedules.some((schedule) => schedule.userId === effectiveUserId)
-      ? loadedSchedules
-      : [...loadedSchedules, createDefaultUserSchedule(effectiveUserId)],
+    users,
+    groups,
+    sessions,
+    schedules: schedules.some((schedule) => schedule.userId === effectiveUserId)
+      ? schedules
+      : [...schedules, createDefaultUserSchedule(effectiveUserId)],
   }, effectiveUserId);
 }
 
@@ -108,8 +105,7 @@ export async function saveSchedule(userId: string, blocks: ScheduleBlock[], data
 export async function saveGroup(group: WorkGroup, data: WorkSyncData) {
   if (isFirebaseConfigured && db) {
     if (requiresFirebaseAuth) {
-      const created = await addDoc(collection(db, "groups"), group);
-      group.id = created.id;
+      await setDoc(doc(db, "groups", group.id), group);
     } else {
       await savePublicDocument("groups", group.id, group as unknown as Record<string, unknown>);
     }
@@ -122,8 +118,7 @@ export async function saveGroup(group: WorkGroup, data: WorkSyncData) {
 export async function saveSession(session: GroupSession, data: WorkSyncData) {
   if (isFirebaseConfigured && db) {
     if (requiresFirebaseAuth) {
-      const created = await addDoc(collection(db, "sessions"), session);
-      session.id = created.id;
+      await setDoc(doc(db, "sessions", session.id), session);
     } else {
       await savePublicDocument("sessions", session.id, session as unknown as Record<string, unknown>);
     }

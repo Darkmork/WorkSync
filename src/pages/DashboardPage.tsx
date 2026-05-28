@@ -14,7 +14,7 @@ export function DashboardPage() {
     <div className="space-y-8 pb-20 lg:pb-0">
       <section className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
         <div>
-          <h1 className="text-4xl font-bold text-on-surface">Hola, {currentUser?.name.split(" ")[0] ?? "Mateo"}.</h1>
+          <h1 className="text-4xl font-bold text-on-surface">Hola, {currentUser?.name?.split(" ")[0] ?? "de nuevo"}.</h1>
           <p className="mt-2 text-lg text-text-secondary">Tienes {data.sessions.length} sesiones y {data.groups.length} grupos activos en WorkSync.</p>
         </div>
         <div className="flex items-center gap-4 rounded-xl border border-white/40 bg-white/80 p-4 shadow-soft backdrop-blur">
