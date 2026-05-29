@@ -31,7 +31,7 @@ const demoForUser = (currentUserId: string, currentUser?: UserProfile): WorkSync
 
 const localKey = "worksync-demo-data";
 
-export async function loadWorkSyncData(currentUserId?: string): Promise<WorkSyncData> {
+export async function loadWorkSyncData(currentUserId?: string, currentEmail?: string): Promise<WorkSyncData> {
   if (!isFirebaseConfigured || !db) {
     const stored = localStorage.getItem(localKey);
     return normalizeData(stored ? (JSON.parse(stored) as WorkSyncData) : cloneDemo());
@@ -49,10 +49,38 @@ export async function loadWorkSyncData(currentUserId?: string): Promise<WorkSync
   ]);
 
   const effectiveUserId = currentUserId ?? "";
+  const email = (currentEmail ?? "").toLowerCase();
   const users = usersSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkSyncData["users"];
-  const groups = groupsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkGroup[];
-  const sessions = sessionsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as GroupSession[];
+  const allGroups = groupsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkGroup[];
+  const allSessions = sessionsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as GroupSession[];
   const schedules = schedulesSnap.docs.map((item) => ({ ...item.data(), userId: item.id })) as WorkSyncData["schedules"];
+
+  // Resolve invitations: a user invited by email auto-joins on load. Then keep
+  // only the groups the user belongs to (owner, member, or invited).
+  const mine = await Promise.all(
+    allGroups.map(async (group) => {
+      const memberIds = group.memberIds ?? [];
+      const invited = group.invitedEmails ?? [];
+      const isMember = memberIds.includes(effectiveUserId);
+      const isInvited = email !== "" && invited.some((entry) => entry.toLowerCase() === email);
+      const belongs = group.ownerId === effectiveUserId || isMember || isInvited;
+      if (!belongs) return null;
+      if (isInvited && !isMember && db) {
+        const nextMembers = [...memberIds, effectiveUserId];
+        const nextInvited = invited.filter((entry) => entry.toLowerCase() !== email);
+        try {
+          await updateDoc(doc(db, "groups", group.id), { memberIds: nextMembers, invitedEmails: nextInvited });
+        } catch {
+          // If the self-join write is rejected, still show the group locally.
+        }
+        return { ...group, memberIds: nextMembers, invitedEmails: nextInvited };
+      }
+      return group;
+    }),
+  );
+  const groups = mine.filter((group): group is WorkGroup => group !== null);
+  const groupIds = new Set(groups.map((group) => group.id));
+  const sessions = allSessions.filter((session) => groupIds.has(session.groupId));
 
   return normalizeData({
     currentUserId: effectiveUserId,

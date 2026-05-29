@@ -52,6 +52,7 @@ export interface WorkGroup {
   color: string;
   ownerId: string;
   memberIds: string[];
+  invitedEmails?: string[];
   status: "active" | "pending" | "inactive";
 }
 

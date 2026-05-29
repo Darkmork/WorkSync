@@ -17,7 +17,7 @@ interface AppDataContextValue {
   recommendations: Recommendation[];
   buildGroupRecommendations: (groupId: string, durationHours: number, modality: Modality) => Recommendation[];
   updateSchedule: (blocks: ScheduleBlock[]) => Promise<void>;
-  createGroup: (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[] }) => Promise<void>;
+  createGroup: (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[]; invitedEmails?: string[] }) => Promise<void>;
   createSessionFromRecommendation: (recommendation: Recommendation) => Promise<GroupSession>;
   markSessionConfirmed: (sessionId: string) => Promise<void>;
 }
@@ -50,7 +50,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
     setLoadError("");
-    withTimeout(loadWorkSyncData(authUser?.uid), 8000)
+    withTimeout(loadWorkSyncData(authUser?.uid, authUser?.email ?? undefined), 8000)
       .then(setData)
       .catch((error) => {
         setLoadError(error instanceof Error ? error.message : "No se pudo cargar Firestore.");
@@ -100,6 +100,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     createGroup: async (payload) => {
       if (!data || !effectiveUserId) return;
       const memberIds = Array.from(new Set([effectiveUserId, ...(payload.memberIds ?? [])]));
+      const ownEmail = currentUser?.email?.toLowerCase();
+      const invitedEmails = Array.from(
+        new Set((payload.invitedEmails ?? []).map((entry) => entry.trim().toLowerCase()).filter((entry) => entry && entry !== ownEmail)),
+      );
       const group: WorkGroup = {
         id: `g-${Date.now()}`,
         name: payload.name,
@@ -108,6 +112,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         color: payload.type === "study" ? "#0058be" : "#006b2c",
         ownerId: effectiveUserId,
         memberIds,
+        invitedEmails,
         status: "active",
       };
       const next = await saveGroup(group, data);

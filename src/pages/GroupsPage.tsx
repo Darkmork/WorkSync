@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { BookOpen, BriefcaseBusiness, Calculator, Plus, Users } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Calculator, Mail, Plus, Users, X } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
 import { groupStatusLabel } from "../domain/labels";
 import type { GroupType } from "../types/worksync";
+
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 const groupIcons: Record<GroupType, typeof Calculator> = {
   study: Calculator,
@@ -18,21 +20,38 @@ export function GroupsPage() {
   const [description, setDescription] = useState("");
   const [type, setType] = useState<GroupType>("study");
   const [memberIds, setMemberIds] = useState<string[]>([]);
+  const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
+  const [emailInput, setEmailInput] = useState("");
 
   if (!data) return <div className="rounded-xl bg-white p-8 shadow-soft">Cargando grupos...</div>;
+
+  const otherUsers = data.users.filter((user) => user.id !== data.currentUserId);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!name.trim()) return;
-    await createGroup({ name, description: description || "Nuevo grupo de coordinacion WorkSync.", type, memberIds });
+    await createGroup({ name, description: description || "Nuevo grupo de coordinacion WorkSync.", type, memberIds, invitedEmails });
     setName("");
     setDescription("");
     setType("study");
     setMemberIds([]);
+    setInvitedEmails([]);
+    setEmailInput("");
   };
 
   const toggleMember = (userId: string) => {
     setMemberIds((current) => (current.includes(userId) ? current.filter((id) => id !== userId) : [...current, userId]));
+  };
+
+  const addEmail = () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!isEmail(email) || invitedEmails.includes(email)) return;
+    setInvitedEmails((current) => [...current, email]);
+    setEmailInput("");
+  };
+
+  const removeEmail = (email: string) => {
+    setInvitedEmails((current) => current.filter((entry) => entry !== email));
   };
 
   return (
@@ -70,6 +89,13 @@ export function GroupsPage() {
                 </div>
                 <span className="font-mono text-xs text-text-secondary">{group.memberIds.length} integrantes</span>
               </div>
+              {(group.invitedEmails?.length ?? 0) > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1 border-t border-border-subtle pt-3">
+                  {group.invitedEmails?.map((email) => (
+                    <span key={email} className="rounded-full bg-secondary-container/25 px-2 py-0.5 font-mono text-[10px] text-primary">{email} · pendiente</span>
+                  ))}
+                </div>
+              )}
             </article>
           );
         })}
@@ -88,12 +114,49 @@ export function GroupsPage() {
           </select>
           <button className="rounded-lg bg-primary px-5 py-3 font-bold text-white">Guardar</button>
         </div>
-        <div className="mt-5">
-          <p className="mb-3 font-mono text-xs uppercase text-text-secondary">Integrantes</p>
-          <div className="flex flex-wrap gap-3">
-            {data.users
-              .filter((user) => user.id !== data.currentUserId)
-              .map((user) => (
+        <div className="mt-6">
+          <p className="mb-3 font-mono text-xs uppercase text-text-secondary">Invitar por correo</p>
+          <div className="flex gap-2">
+            <input
+              type="email"
+              className="flex-1 rounded-lg border border-border-subtle bg-surface-container-low px-4 py-3 outline-none focus:ring-2 focus:ring-primary"
+              placeholder="persona@correo.com"
+              value={emailInput}
+              onChange={(event) => setEmailInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  addEmail();
+                }
+              }}
+            />
+            <button type="button" onClick={addEmail} disabled={!isEmail(emailInput)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 font-bold text-white disabled:opacity-50">
+              <Mail size={16} />
+              Invitar
+            </button>
+          </div>
+          {invitedEmails.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {invitedEmails.map((email) => (
+                <span key={email} className="inline-flex items-center gap-2 rounded-full bg-primary-fixed px-3 py-1.5 text-sm text-primary">
+                  {email}
+                  <button type="button" onClick={() => removeEmail(email)} aria-label={`Quitar ${email}`}>
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <p className="mt-2 text-xs text-text-secondary">Se unen al grupo cuando inician sesion en WorkSync con ese correo.</p>
+        </div>
+
+        <div className="mt-6">
+          <p className="mb-3 font-mono text-xs uppercase text-text-secondary">Usuarios existentes</p>
+          {otherUsers.length === 0 ? (
+            <p className="text-sm text-text-secondary">Aun no hay otros usuarios registrados. Invitalos por correo arriba.</p>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              {otherUsers.map((user) => (
                 <button
                   key={user.id}
                   type="button"
@@ -108,7 +171,8 @@ export function GroupsPage() {
                   {user.name}
                 </button>
               ))}
-          </div>
+            </div>
+          )}
         </div>
       </form>
     </div>
