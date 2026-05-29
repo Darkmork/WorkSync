@@ -48,15 +48,41 @@ async function call(path: string, init?: RequestInit) {
   return response.json();
 }
 
-export async function fetchEvents(timeMinISO: string, timeMaxISO: string): Promise<CalendarEvent[]> {
+export interface CalendarInfo {
+  id: string;
+  summary: string;
+  primary: boolean;
+}
+
+export function userTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
+export async function fetchCalendarList(): Promise<CalendarInfo[]> {
+  const data = (await call(`/users/me/calendarList`)) as {
+    items?: Array<{ id: string; summary?: string; summaryOverride?: string; primary?: boolean }>;
+  };
+  return (data.items ?? []).map((item) => ({
+    id: item.id,
+    summary: item.summaryOverride ?? item.summary ?? item.id,
+    primary: Boolean(item.primary),
+  }));
+}
+
+export async function fetchEvents(timeMinISO: string, timeMaxISO: string, calendarId = "primary"): Promise<CalendarEvent[]> {
   const params = new URLSearchParams({
     singleEvents: "true",
     orderBy: "startTime",
     timeMin: timeMinISO,
     timeMax: timeMaxISO,
+    timeZone: userTimeZone(),
     maxResults: "50",
   });
-  const data = (await call(`/calendars/primary/events?${params.toString()}`)) as {
+  const data = (await call(`/calendars/${encodeURIComponent(calendarId)}/events?${params.toString()}`)) as {
     items?: Array<{ id: string; summary?: string; start?: { dateTime?: string; date?: string }; end?: { dateTime?: string; date?: string } }>;
   };
   return (data.items ?? []).map((item) => ({
@@ -67,19 +93,19 @@ export async function fetchEvents(timeMinISO: string, timeMaxISO: string): Promi
   }));
 }
 
-export function fetchTodayEvents(now = new Date()): Promise<CalendarEvent[]> {
+export function fetchTodayEvents(calendarId = "primary", now = new Date()): Promise<CalendarEvent[]> {
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   const end = new Date(now);
   end.setHours(23, 59, 59, 999);
-  return fetchEvents(start.toISOString(), end.toISOString());
+  return fetchEvents(start.toISOString(), end.toISOString(), calendarId);
 }
 
-export function fetchWeekEvents(now = new Date()): Promise<CalendarEvent[]> {
+export function fetchWeekEvents(calendarId = "primary", now = new Date()): Promise<CalendarEvent[]> {
   const start = startOfWeek(now);
   const end = new Date(start);
   end.setDate(start.getDate() + 7);
-  return fetchEvents(start.toISOString(), end.toISOString());
+  return fetchEvents(start.toISOString(), end.toISOString(), calendarId);
 }
 
 function startOfWeek(now: Date): Date {

@@ -15,7 +15,7 @@ service cloud.firestore {
     }
 
     function isList(field) {
-      return field is list && field.size() < 100;
+      return field is list && field.size() < 500;
     }
 
     match /users/{userId} {

@@ -14,11 +14,14 @@ import { normalizeScheduleBlocks } from "../data/demoData";
 import { auth, db, isFirebaseConfigured } from "./firebase";
 import { clearCalendarToken, hasCalendarToken, setCalendarToken } from "./calendar";
 
-const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const CALENDAR_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar.readonly",
+];
 
 function buildGoogleProvider(prompt: "select_account" | "consent") {
   const provider = new GoogleAuthProvider();
-  provider.addScope(CALENDAR_SCOPE);
+  CALENDAR_SCOPES.forEach((scope) => provider.addScope(scope));
   provider.setCustomParameters({ prompt });
   return provider;
 }
