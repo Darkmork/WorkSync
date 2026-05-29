@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { CalendarDays, CheckCircle2, MapPin, Video } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
 import { modalityLabel, sessionStatusLabel } from "../domain/labels";
+import { createEvent, hasCalendarToken } from "../services/calendar";
+import { toEventDateTime } from "../domain/calendarMapping";
 
 export function SessionDetailPage() {
   const { sessionId } = useParams();
   const { data, markSessionConfirmed } = useAppData();
+  const [calendarMessage, setCalendarMessage] = useState("");
   const session = data?.sessions.find((item) => item.id === sessionId);
   const group = data?.groups.find((item) => item.id === session?.groupId);
 
@@ -17,6 +21,23 @@ export function SessionDetailPage() {
       </div>
     );
   }
+
+  const confirm = async () => {
+    await markSessionConfirmed(session.id);
+    if (hasCalendarToken() && session.dateISO) {
+      try {
+        await createEvent({
+          summary: session.title,
+          description: session.justification,
+          startISO: toEventDateTime(session.dateISO, session.start),
+          endISO: toEventDateTime(session.dateISO, session.end),
+        });
+        setCalendarMessage("Evento agregado a tu Google Calendar.");
+      } catch {
+        setCalendarMessage("Sesion confirmada, pero no se pudo crear el evento en Calendar.");
+      }
+    }
+  };
 
   return (
     <div className="grid gap-8 pb-20 lg:grid-cols-[1.2fr_0.8fr] lg:pb-0">
@@ -69,7 +90,7 @@ export function SessionDetailPage() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <button
-            onClick={() => markSessionConfirmed(session.id)}
+            onClick={confirm}
             disabled={session.status === "confirmed"}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-white transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
@@ -78,6 +99,7 @@ export function SessionDetailPage() {
           </button>
           <Link to="/recomendaciones" className="rounded-lg border border-border-subtle px-6 py-3 font-bold text-primary">Ver otras opciones</Link>
         </div>
+        {calendarMessage && <p className="mt-4 rounded-lg bg-primary-fixed px-4 py-3 text-sm text-primary">{calendarMessage}</p>}
       </section>
 
       <aside className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">

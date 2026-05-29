@@ -7,10 +7,33 @@ import {
   signOut,
   updateProfile,
   type User,
+  type UserCredential,
 } from "firebase/auth";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { normalizeScheduleBlocks } from "../data/demoData";
 import { auth, db, isFirebaseConfigured } from "./firebase";
+import { clearCalendarToken, hasCalendarToken, setCalendarToken } from "./calendar";
+
+const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+
+function buildGoogleProvider(prompt: "select_account" | "consent") {
+  const provider = new GoogleAuthProvider();
+  provider.addScope(CALENDAR_SCOPE);
+  provider.setCustomParameters({ prompt });
+  return provider;
+}
+
+function captureCalendarToken(result: UserCredential) {
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (credential?.accessToken) setCalendarToken(credential.accessToken);
+}
+
+export async function connectCalendar(): Promise<boolean> {
+  if (!auth) return false;
+  const result = await signInWithPopup(auth, buildGoogleProvider("consent"));
+  captureCalendarToken(result);
+  return hasCalendarToken();
+}
 
 export function subscribeAuth(callback: (user: User | null) => void) {
   if (!isFirebaseConfigured || !auth) {
@@ -30,11 +53,10 @@ export async function loginWithEmail(email: string, password: string) {
 
 export async function loginWithGoogle() {
   if (!auth) return null;
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-  const credential = await signInWithPopup(auth, provider);
-  await ensureUserProfile(credential.user);
-  return credential.user;
+  const result = await signInWithPopup(auth, buildGoogleProvider("select_account"));
+  captureCalendarToken(result);
+  await ensureUserProfile(result.user);
+  return result.user;
 }
 
 export async function registerWithEmail(name: string, email: string, password: string) {
@@ -47,6 +69,7 @@ export async function registerWithEmail(name: string, email: string, password: s
 
 export async function logout() {
   if (auth) await signOut(auth);
+  clearCalendarToken();
 }
 
 export async function ensureUserProfile(user: User, fallbackName?: string) {

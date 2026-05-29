@@ -13,11 +13,19 @@ const dayNames = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes"
 const monthAbbr = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 const dayKeyToWeekday: Record<DayKey, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
-function nextDateLabel(day: DayKey, from = new Date()): string {
+function nextDate(day: DayKey, from = new Date()): Date {
   const diff = (dayKeyToWeekday[day] - from.getDay() + 7) % 7;
   const date = new Date(from);
   date.setDate(from.getDate() + diff);
+  return date;
+}
+
+function dateLabelOf(date: Date): string {
   return `${dayNames[date.getDay()]} ${date.getDate()} ${monthAbbr[date.getMonth()]}`;
+}
+
+function isoDateOf(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 const endForWindow = (start: string, durationBlocks: number) => {
@@ -68,11 +76,13 @@ export function buildRecommendations(
         modalityLabel(modality),
       ];
 
+      const recDate = nextDate(day.key);
       candidates.push({
         id: `${group.id}-${day.key}-${hour}`,
         groupId: group.id,
         day: day.key,
-        dateLabel: nextDateLabel(day.key),
+        dateLabel: dateLabelOf(recDate),
+        dateISO: isoDateOf(recDate),
         start: hour,
         end: endForWindow(hour, durationHours),
         score,

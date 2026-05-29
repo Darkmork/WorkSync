@@ -121,6 +121,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         groupId: recommendation.groupId,
         title: group ? `Sesion ${group.name}` : "Sesion WorkSync",
         dateLabel: recommendation.dateLabel,
+        dateISO: recommendation.dateISO,
         start: recommendation.start,
         end: recommendation.end,
         modality: recommendation.modality,

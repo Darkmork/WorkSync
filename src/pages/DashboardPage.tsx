@@ -1,5 +1,6 @@
 import { CalendarCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { CalendarAgenda } from "../components/CalendarAgenda";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { TaskList } from "../components/TaskList";
 import { WeatherWidget } from "../components/WeatherWidget";
@@ -65,6 +66,7 @@ export function DashboardPage() {
             </div>
             {recommendations[0] && <RecommendationCard recommendation={recommendations[0]} />}
           </div>
+          <CalendarAgenda />
           <TaskList />
         </aside>
       </section>

@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
-import { Brush, Lightbulb } from "lucide-react";
+import { Brush, CalendarDays, Lightbulb } from "lucide-react";
 import { ScheduleGrid } from "../components/ScheduleGrid";
 import { useAppData } from "../services/AppDataContext";
+import { connectCalendar } from "../services/auth";
+import { CalendarAuthError, fetchWeekEvents, hasCalendarToken } from "../services/calendar";
+import { eventsToBusyBlocks } from "../domain/calendarMapping";
 import type { ScheduleBlock, ScheduleState } from "../types/worksync";
 
 type BrushMode = ScheduleState | "note";
@@ -19,6 +22,7 @@ export function SchedulePage() {
   const [activeBrush, setActiveBrush] = useState<BrushMode>("free");
   const [selectedKey, setSelectedKey] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [importMsg, setImportMsg] = useState("");
   const currentSchedule = useMemo(
     () => data?.schedules.find((schedule) => schedule.userId === data.currentUserId),
     [data],
@@ -47,6 +51,24 @@ export function SchedulePage() {
       setStatus("saved");
     } catch {
       setStatus("error");
+    }
+  };
+
+  const importFromCalendar = async () => {
+    setImportMsg("Importando...");
+    try {
+      if (!hasCalendarToken()) {
+        const ok = await connectCalendar();
+        if (!ok) {
+          setImportMsg("No se pudo conectar Google Calendar.");
+          return;
+        }
+      }
+      const events = await fetchWeekEvents();
+      edit(eventsToBusyBlocks(events, blocks));
+      setImportMsg("Eventos importados como 'ocupado'. Revisa y guarda.");
+    } catch (error) {
+      setImportMsg(error instanceof CalendarAuthError ? "Reconecta Google Calendar e intenta de nuevo." : "No se pudo importar de Calendar.");
     }
   };
 
@@ -106,6 +128,15 @@ export function SchedulePage() {
           {status === "saving" ? "Guardando..." : status === "saved" ? "Guardado ✓" : "Guardar cambios"}
         </button>
         {status === "error" && <p className="rounded-lg bg-status-occupied/15 px-3 py-2 text-center text-xs text-error-red">No se pudo guardar. Intenta de nuevo.</p>}
+        <button
+          type="button"
+          onClick={importFromCalendar}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border-subtle px-5 py-3 text-sm font-bold text-primary transition hover:bg-surface-container-low"
+        >
+          <CalendarDays size={16} />
+          Importar de Google Calendar
+        </button>
+        {importMsg && <p className="rounded-lg bg-primary-fixed px-3 py-2 text-center text-xs text-primary">{importMsg}</p>}
       </aside>
       <section className="min-w-0 flex-1">
         <div className="mb-5">

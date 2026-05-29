@@ -55,11 +55,19 @@ export interface WorkGroup {
   status: "active" | "pending" | "inactive";
 }
 
+export interface CalendarEvent {
+  id: string;
+  summary: string;
+  start: string;
+  end: string;
+}
+
 export interface Recommendation {
   id: string;
   groupId: string;
   day: DayKey;
   dateLabel: string;
+  dateISO?: string;
   start: string;
   end: string;
   score: number;
@@ -75,6 +83,7 @@ export interface GroupSession {
   groupId: string;
   title: string;
   dateLabel: string;
+  dateISO?: string;
   start: string;
   end: string;
   modality: Modality;
