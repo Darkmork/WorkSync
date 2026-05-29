@@ -20,6 +20,16 @@ export interface ScheduleBlock {
   day: DayKey;
   hour: string;
   state: ScheduleState;
+  note?: string;
+}
+
+export interface Task {
+  id: string;
+  userId: string;
+  title: string;
+  date: string | null;
+  done: boolean;
+  createdAt: number;
 }
 
 export interface TimeSlot {

@@ -12,16 +12,31 @@ interface ScheduleGridProps {
   blocks: ScheduleBlock[];
   activeState?: ScheduleState;
   editable?: boolean;
+  noteMode?: boolean;
+  selectedKey?: string;
   onChange?: (blocks: ScheduleBlock[]) => void;
+  onSelect?: (day: ScheduleBlock["day"], hour: string) => void;
 }
 
-export function ScheduleGrid({ blocks, activeState = "free", editable = false, onChange }: ScheduleGridProps) {
-  const stateFor = (day: string, hour: string) =>
-    blocks.find((block) => block.day === day && block.hour === hour)?.state ?? "free";
+export function ScheduleGrid({
+  blocks,
+  activeState = "free",
+  editable = false,
+  noteMode = false,
+  selectedKey,
+  onChange,
+  onSelect,
+}: ScheduleGridProps) {
+  const blockFor = (day: string, hour: string) => blocks.find((block) => block.day === day && block.hour === hour);
+  const stateFor = (day: string, hour: string) => blockFor(day, hour)?.state ?? "free";
 
   const paint = (day: ScheduleBlock["day"], hour: string) => {
-    if (!editable || !onChange) return;
-    onChange(blocks.map((block) => (block.day === day && block.hour === hour ? { ...block, state: activeState } : block)));
+    if (!editable) return;
+    if (noteMode) {
+      onSelect?.(day, hour);
+      return;
+    }
+    if (onChange) onChange(blocks.map((block) => (block.day === day && block.hour === hour ? { ...block, state: activeState } : block)));
   };
 
   return (
@@ -44,15 +59,21 @@ export function ScheduleGrid({ blocks, activeState = "free", editable = false, o
                 {slot.kind === "lunch" && <span className="mt-0.5 rounded-full bg-status-avoid/30 px-1.5 text-[9px] text-on-surface-variant">13:35 - 14:10</span>}
               </div>
               {days.map((day) => {
-                const state = stateFor(day.key, slot.start);
+                const block = blockFor(day.key, slot.start);
+                const state = block?.state ?? "free";
+                const key = `${day.key}-${slot.start}`;
                 return (
                   <button
-                    key={`${day.key}-${slot.start}`}
+                    key={key}
                     type="button"
                     onClick={() => paint(day.key, slot.start)}
-                    className={`h-12 min-w-20 transition ${stateClasses[state]}`}
-                    aria-label={`${day.label} ${slot.label} ${state}`}
-                  />
+                    className={`relative h-12 min-w-20 px-1 text-left transition ${stateClasses[state]} ${
+                      selectedKey === key ? "ring-2 ring-inset ring-primary" : ""
+                    }`}
+                    aria-label={`${day.label} ${slot.label} ${state}${block?.note ? ` ${block.note}` : ""}`}
+                  >
+                    {block?.note && <span className="block truncate text-[9px] font-semibold leading-tight text-on-surface/80">{block.note}</span>}
+                  </button>
                 );
               })}
             </div>

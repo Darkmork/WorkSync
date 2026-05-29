@@ -41,6 +41,14 @@ service cloud.firestore {
         && isList(request.resource.data.memberIds);
     }
 
+    match /tasks/{taskId} {
+      allow read, delete: if isSignedIn() && request.auth.uid == resource.data.userId;
+      allow create: if isSignedIn()
+        && request.auth.uid == request.resource.data.userId
+        && isString(request.resource.data.title);
+      allow update: if isSignedIn() && request.auth.uid == resource.data.userId;
+    }
+
     // Sessions belong to a group rather than a single owner. Writes require an
     // authenticated user; tightening to group membership is a follow-up that
     // depends on removing demo-data seeding for empty Firestore collections.
