@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Mail, Plus, Trash2, X } from "lucide-react";
 import type { UserProfile, WorkGroup } from "../types/worksync";
+import { buildInviteMailto, openMailto } from "../domain/invites";
+import { useAppData } from "../services/AppDataContext";
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
@@ -13,6 +15,7 @@ interface GroupEditorProps {
 }
 
 export function GroupEditor({ group, users, onSave, onDelete, onClose }: GroupEditorProps) {
+  const { currentUser } = useAppData();
   const [name, setName] = useState(group.name);
   const [description, setDescription] = useState(group.description);
   const [memberIds, setMemberIds] = useState<string[]>(group.memberIds);
@@ -31,6 +34,8 @@ export function GroupEditor({ group, users, onSave, onDelete, onClose }: GroupEd
   const addEmail = () => {
     const email = emailInput.trim().toLowerCase();
     if (!isEmail(email) || invitedEmails.includes(email) || memberUsers.some((user) => user.email.toLowerCase() === email)) return;
+    const mailtoUrl = buildInviteMailto(email, group.name, currentUser?.name);
+    openMailto(mailtoUrl);
     setInvitedEmails((current) => [...current, email]);
     setEmailInput("");
   };
