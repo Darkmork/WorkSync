@@ -27,7 +27,7 @@ export function RecommendationCard({ recommendation, featured = false }: { recom
         </div>
         <div className="rounded-xl bg-primary-container px-5 py-3 text-center text-white">
           <div className="text-2xl font-bold">{recommendation.score}%</div>
-          <div className="font-mono text-[11px] uppercase">match score</div>
+          <div className="font-mono text-[11px] uppercase">compatibilidad</div>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">

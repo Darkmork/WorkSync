@@ -1,6 +1,7 @@
 import { CalendarDays, CheckCircle2, MapPin, Video } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
+import { modalityLabel, sessionStatusLabel } from "../domain/labels";
 
 export function SessionDetailPage() {
   const { sessionId } = useParams();
@@ -20,7 +21,20 @@ export function SessionDetailPage() {
   return (
     <div className="grid gap-8 pb-20 lg:grid-cols-[1.2fr_0.8fr] lg:pb-0">
       <section className="rounded-xl border border-border-subtle bg-white p-8 shadow-soft">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Detalle de sesion</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Detalle de sesion</p>
+          <span
+            className={`rounded-full px-3 py-1 font-mono text-xs ${
+              session.status === "confirmed"
+                ? "bg-status-free/20 text-tertiary"
+                : session.status === "cancelled"
+                  ? "bg-status-occupied/20 text-error-red"
+                  : "bg-secondary-container/25 text-primary"
+            }`}
+          >
+            {sessionStatusLabel(session.status)}
+          </span>
+        </div>
         <h1 className="mt-3 text-4xl font-bold">{session.title}</h1>
         <p className="mt-3 text-lg text-text-secondary">{group?.name}</p>
 
@@ -56,10 +70,11 @@ export function SessionDetailPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <button
             onClick={() => markSessionConfirmed(session.id)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-white transition-transform active:scale-95"
+            disabled={session.status === "confirmed"}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-white transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CheckCircle2 size={18} />
-            Confirmar sesion
+            {session.status === "confirmed" ? "Sesion confirmada" : "Confirmar sesion"}
           </button>
           <Link to="/recomendaciones" className="rounded-lg border border-border-subtle px-6 py-3 font-bold text-primary">Ver otras opciones</Link>
         </div>
@@ -83,10 +98,4 @@ export function SessionDetailPage() {
       </aside>
     </div>
   );
-}
-
-function modalityLabel(modality: string) {
-  if (modality === "remote") return "Online";
-  if (modality === "in_person") return "Presencial";
-  return "Hibrida";
 }

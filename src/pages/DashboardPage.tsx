@@ -2,6 +2,7 @@ import { CalendarCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { WeatherWidget } from "../components/WeatherWidget";
+import { sessionStatusLabel } from "../domain/labels";
 import { useAppData } from "../services/AppDataContext";
 
 export function DashboardPage() {
@@ -48,7 +49,7 @@ export function DashboardPage() {
                     <h3 className="font-bold">{session.title}</h3>
                     <p className="text-sm text-text-secondary">{session.dateLabel}, {session.start} - {session.end}</p>
                   </div>
-                  <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{session.status}</span>
+                  <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{sessionStatusLabel(session.status)}</span>
                 </Link>
               ))}
             </div>
@@ -59,7 +60,7 @@ export function DashboardPage() {
           <div className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">
             <div className="mb-4 flex items-center gap-2">
               <Sparkles className="text-primary" />
-              <h2 className="text-xl font-bold">Intelligent Recommendations</h2>
+              <h2 className="text-xl font-bold">Recomendaciones inteligentes</h2>
             </div>
             {recommendations[0] && <RecommendationCard recommendation={recommendations[0]} />}
           </div>

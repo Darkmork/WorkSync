@@ -65,13 +65,13 @@ export function RecommendationsPage() {
         </div>
         <div className="rounded-xl bg-primary-container p-6 text-white shadow-soft">
           <Sparkles className="mb-3" />
-          <p className="leading-6">Smart syncing esta activo. Priorizamos bloques comunes, preferencias y duracion.</p>
+          <p className="leading-6">La sincronizacion inteligente esta activa. Priorizamos bloques comunes, preferencias y duracion.</p>
         </div>
       </aside>
 
       <section className="min-w-0 flex-1 space-y-6">
         <header>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Intelligent Recommendations</p>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Recomendaciones inteligentes</p>
           <h1 className="mt-2 text-4xl font-bold">Mejores momentos</h1>
           <p className="mt-2 text-text-secondary">Basado en la disponibilidad y habitos de {group.name}.</p>
         </header>

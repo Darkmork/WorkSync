@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BookOpen, BriefcaseBusiness, Calculator, Plus, Users } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
+import { groupStatusLabel } from "../domain/labels";
 import type { GroupType } from "../types/worksync";
 
 const groupIcons: Record<GroupType, typeof Calculator> = {
@@ -57,7 +58,7 @@ export function GroupsPage() {
                 <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary-fixed text-primary">
                   <Icon size={28} />
                 </div>
-                <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{group.status}</span>
+                <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{groupStatusLabel(group.status)}</span>
               </div>
               <h2 className="text-2xl font-bold">{group.name}</h2>
               <p className="mt-2 min-h-12 text-text-secondary">{group.description}</p>

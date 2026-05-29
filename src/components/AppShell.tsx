@@ -8,7 +8,7 @@ const navItems = [
   { to: "/", label: "Inicio", icon: Home },
   { to: "/horario", label: "Mi horario", icon: CalendarDays },
   { to: "/grupos", label: "Mis grupos", icon: Users },
-  { to: "/recomendaciones", label: "Intelligent Recommendations", icon: Sparkles },
+  { to: "/recomendaciones", label: "Recomendaciones", icon: Sparkles },
 ];
 
 export function AppShell() {
@@ -82,7 +82,7 @@ export function AppShell() {
               }
             >
               <Icon size={18} />
-              <span className="max-w-20 truncate">{item.label.replace("Intelligent ", "")}</span>
+              <span className="max-w-20 truncate">{item.label}</span>
             </NavLink>
           );
         })}

@@ -1,5 +1,6 @@
 import type { DayKey, Recommendation, ScheduleBlock, UserSchedule, WorkGroup, Modality } from "../types/worksync";
 import { days, timeSlots } from "../types/worksync";
+import { modalityLabel } from "./labels";
 
 const stateWeight: Record<ScheduleBlock["state"], number> = {
   preferred: 24,
@@ -88,10 +89,4 @@ export function buildRecommendations(
   }
 
   return candidates.sort((a, b) => b.score - a.score).slice(0, 3);
-}
-
-function modalityLabel(modality: Modality) {
-  if (modality === "remote") return "Online";
-  if (modality === "in_person") return "Presencial";
-  return "Hibrida";
 }
