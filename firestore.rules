@@ -18,7 +18,18 @@ service cloud.firestore {
       return field is list && field.size() < 500;
     }
 
+    // True when the signed-in user is a member of the given group. Costs one
+    // document read; only safe for single-document writes (not list queries).
+    function isGroupMember(groupId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/groups/$(groupId))
+        && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+    }
+
     match /users/{userId} {
+      // Profiles (name + avatar) are readable by any signed-in user so that group
+      // members can see each other. Email is included; restricting it would require
+      // splitting sensitive fields into a private subdocument (follow-up).
       allow read: if isSignedIn();
       allow create, update: if isOwner(userId)
         && isString(request.resource.data.name)
@@ -26,13 +37,22 @@ service cloud.firestore {
     }
 
     match /schedules/{userId} {
+      // Readable by any signed-in user because recommendations need co-members'
+      // availability. A "co-members only" rule is not expressible for list queries
+      // without denormalizing the reader list onto each schedule (follow-up).
       allow read: if isSignedIn();
       allow create, update: if isOwner(userId)
         && isList(request.resource.data.blocks);
     }
 
     match /groups/{groupId} {
-      allow read: if isSignedIn();
+      // Only the owner, a member, or an invited email may read a group. Clients
+      // must query by membership (array-contains uid / invited email); an
+      // unconstrained list query is rejected because rules are not filters.
+      allow read: if isSignedIn() && (
+        request.auth.uid in resource.data.memberIds
+        || request.auth.token.email in resource.data.get('invitedEmails', [])
+      );
       allow create: if isOwner(request.resource.data.ownerId)
         && isString(request.resource.data.name)
         && isList(request.resource.data.memberIds);
@@ -58,17 +78,19 @@ service cloud.firestore {
       allow update: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
 
-    // Sessions belong to a group rather than a single owner. Writes require an
-    // authenticated user; tightening to group membership is a follow-up that
-    // depends on removing demo-data seeding for empty Firestore collections.
+    // Sessions belong to a group rather than a single owner. Only members of the
+    // session's group may create or confirm it. Read stays open to any signed-in
+    // user: a list query can't verify membership per document within Firestore's
+    // get() limits, so the client filters sessions to the user's groups. A tighter
+    // read rule needs group membership denormalized onto each session (follow-up).
     match /sessions/{sessionId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn()
-        && isString(request.resource.data.groupId)
+      allow create: if isString(request.resource.data.groupId)
         && isString(request.resource.data.title)
-        && isString(request.resource.data.status);
-      allow update: if isSignedIn()
-        && isString(request.resource.data.status);
+        && isString(request.resource.data.status)
+        && isGroupMember(request.resource.data.groupId);
+      allow update: if isString(request.resource.data.status)
+        && isGroupMember(resource.data.groupId);
     }
   }
 }

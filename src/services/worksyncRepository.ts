@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { demoData, normalizeScheduleBlocks } from "../data/demoData";
 import type { GroupSession, ScheduleBlock, UserProfile, WorkGroup, WorkSyncData } from "../types/worksync";
 import { db, firebaseConfig, isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
@@ -41,30 +41,38 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
     return loadPublicFirebaseData(currentUserId);
   }
 
-  const [usersSnap, groupsSnap, sessionsSnap, schedulesSnap] = await Promise.all([
-    getDocs(collection(db, "users")),
-    getDocs(collection(db, "groups")),
-    getDocs(collection(db, "sessions")),
-    getDocs(collection(db, "schedules")),
-  ]);
-
   const effectiveUserId = currentUserId ?? "";
   const email = (currentEmail ?? "").toLowerCase();
+
+  // Groups: the read rule requires membership, so query by membership instead of
+  // reading the whole collection — an unconstrained list query would be rejected
+  // (Firestore rules are not filters). One query for member/owner, one for invited.
+  const groupQueries = [getDocs(query(collection(db, "groups"), where("memberIds", "array-contains", effectiveUserId)))];
+  if (email) {
+    groupQueries.push(getDocs(query(collection(db, "groups"), where("invitedEmails", "array-contains", email))));
+  }
+  const [usersSnap, sessionsSnap, schedulesSnap, ...groupSnaps] = await Promise.all([
+    getDocs(collection(db, "users")),
+    getDocs(collection(db, "sessions")),
+    getDocs(collection(db, "schedules")),
+    ...groupQueries,
+  ]);
+
   const users = usersSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkSyncData["users"];
-  const allGroups = groupsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkGroup[];
   const allSessions = sessionsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as GroupSession[];
   const schedules = schedulesSnap.docs.map((item) => ({ ...item.data(), userId: item.id })) as WorkSyncData["schedules"];
 
-  // Resolve invitations: a user invited by email auto-joins on load. Then keep
-  // only the groups the user belongs to (owner, member, or invited).
-  const mine = await Promise.all(
-    allGroups.map(async (group) => {
+  // The two group queries can overlap, so dedupe by id.
+  const groupsById = new Map<string, WorkGroup>();
+  groupSnaps.forEach((snap) => snap.docs.forEach((item) => groupsById.set(item.id, { ...(item.data() as WorkGroup), id: item.id })));
+
+  // Resolve invitations: a user invited by email auto-joins on load.
+  const groups = await Promise.all(
+    Array.from(groupsById.values()).map(async (group) => {
       const memberIds = group.memberIds ?? [];
       const invited = group.invitedEmails ?? [];
       const isMember = memberIds.includes(effectiveUserId);
       const isInvited = email !== "" && invited.some((entry) => entry.toLowerCase() === email);
-      const belongs = group.ownerId === effectiveUserId || isMember || isInvited;
-      if (!belongs) return null;
       if (isInvited && !isMember && db) {
         const nextMembers = [...memberIds, effectiveUserId];
         const nextInvited = invited.filter((entry) => entry.toLowerCase() !== email);
@@ -78,7 +86,6 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
       return group;
     }),
   );
-  const groups = mine.filter((group): group is WorkGroup => group !== null);
   const groupIds = new Set(groups.map((group) => group.id));
   const sessions = allSessions.filter((session) => groupIds.has(session.groupId));
 

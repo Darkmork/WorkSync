@@ -7,3 +7,6 @@ dist/
 .firebase/
 .gstack/
 .superpowers/
+*-debug.log
+firebase-debug.log
+firestore-debug.log
