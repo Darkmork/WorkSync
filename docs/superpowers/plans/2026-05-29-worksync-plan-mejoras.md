@@ -152,9 +152,25 @@ Refactorizar sin esto es trabajar a ciegas.
 
 **Archivos:** `package.json`, `eslint.config.js` (nuevo), correcciones puntuales en `src/`.
 
+**Estado (2026-05-29) — HECHO:**
+- [x] Instalado toolchain flat-config: `eslint@9`, `@eslint/js`, `typescript-eslint@8`,
+      `eslint-plugin-react-hooks@5`, `eslint-plugin-react-refresh`, `globals`.
+- [x] `eslint.config.js` (flat): `js.recommended` + `tseslint.recommended` + reglas de hooks;
+      bloque `src/**` con globals de browser y `react-refresh`, bloque `tests/**`+`*.config.*`+`*.test.*` con globals de Node.
+- [x] Script `"lint": "eslint . && tsc -b --noEmit"`.
+- [x] Hallazgos corregidos: `tasksRepository.ts` renombró el predicado `useFirestore` → `firestoreEnabled`
+      (falso positivo de `rules-of-hooks` por el prefijo `use`); `ScheduleGrid.tsx` eliminó `stateFor` sin usar.
+- [x] Queda 1 *warning* aceptado (`react-refresh/only-export-components` por `useAppData`): no rompe el lint
+      (exit 0) y se disuelve en Fase 4 al separar el hook del provider.
+- [x] **Tests de caracterización** de las transformaciones del repositorio en modo local
+      (`src/services/worksyncRepository.test.ts`, 7 casos): `saveSchedule` (reemplaza/normaliza/agrega),
+      `saveGroup` (antepone), `updateGroup` (reemplaza por id), `deleteGroup` (cascada de sesiones),
+      `saveSession` (antepone), `confirmSession` (solo la indicada). Mockean `./firebase` para no tocar red.
+      Son la red de seguridad para mover esa lógica a `mutations.ts` en Fase 4.
+
 **Criterios de aceptación:**
-- [ ] `npm run lint` corre ESLint + typecheck y pasa.
-- [ ] CI local (`npm test`) sigue verde.
+- [x] `npm run lint` corre ESLint + typecheck y pasa (exit 0).
+- [x] CI local (`npm test`) sigue verde: **29 tests** (22 previos + 7 nuevos).
 
 ---
 

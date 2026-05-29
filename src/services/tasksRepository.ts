@@ -2,11 +2,12 @@ import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } 
 import { db, isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
 import type { Task } from "../types/worksync";
 
-const useFirestore = () => isFirebaseConfigured && requiresFirebaseAuth && Boolean(db);
+// Not a React hook: a plain predicate for whether Firestore is the backend.
+const firestoreEnabled = () => isFirebaseConfigured && requiresFirebaseAuth && Boolean(db);
 const localKey = (userId: string) => `worksync-tasks-${userId}`;
 
 export async function loadTasks(userId: string): Promise<Task[]> {
-  if (useFirestore() && db) {
+  if (firestoreEnabled() && db) {
     const snap = await getDocs(query(collection(db, "tasks"), where("userId", "==", userId)));
     return snap.docs.map((item) => ({ ...item.data(), id: item.id }) as Task);
   }
@@ -21,13 +22,13 @@ export function persistTasks(userId: string, tasks: Task[]) {
 }
 
 export async function addTask(task: Task) {
-  if (useFirestore() && db) await setDoc(doc(db, "tasks", task.id), task);
+  if (firestoreEnabled() && db) await setDoc(doc(db, "tasks", task.id), task);
 }
 
 export async function updateTaskDone(id: string, done: boolean) {
-  if (useFirestore() && db) await updateDoc(doc(db, "tasks", id), { done });
+  if (firestoreEnabled() && db) await updateDoc(doc(db, "tasks", id), { done });
 }
 
 export async function deleteTask(id: string) {
-  if (useFirestore() && db) await deleteDoc(doc(db, "tasks", id));
+  if (firestoreEnabled() && db) await deleteDoc(doc(db, "tasks", id));
 }

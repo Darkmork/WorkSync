@@ -28,7 +28,6 @@ export function ScheduleGrid({
   onSelect,
 }: ScheduleGridProps) {
   const blockFor = (day: string, hour: string) => blocks.find((block) => block.day === day && block.hour === hour);
-  const stateFor = (day: string, hour: string) => blockFor(day, hour)?.state ?? "free";
 
   const paint = (day: ScheduleBlock["day"], hour: string) => {
     if (!editable) return;
