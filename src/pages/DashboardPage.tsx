@@ -1,6 +1,7 @@
-import { CalendarCheck, CloudSun, Sparkles } from "lucide-react";
+import { CalendarCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RecommendationCard } from "../components/RecommendationCard";
+import { WeatherWidget } from "../components/WeatherWidget";
 import { useAppData } from "../services/AppDataContext";
 
 export function DashboardPage() {
@@ -17,15 +18,7 @@ export function DashboardPage() {
           <h1 className="text-4xl font-bold text-on-surface">Hola, {currentUser?.name?.split(" ")[0] ?? "de nuevo"}.</h1>
           <p className="mt-2 text-lg text-text-secondary">Tienes {data.sessions.length} sesiones y {data.groups.length} grupos activos en WorkSync.</p>
         </div>
-        <div className="flex items-center gap-4 rounded-xl border border-white/40 bg-white/80 p-4 shadow-soft backdrop-blur">
-          <div className="grid h-12 w-12 place-items-center rounded-lg bg-secondary-container/25 text-primary">
-            <CloudSun />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-primary">24°C</div>
-            <div className="font-mono text-xs uppercase text-text-secondary">Parcialmente nublado</div>
-          </div>
-        </div>
+        <WeatherWidget />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.45fr_0.95fr]">
