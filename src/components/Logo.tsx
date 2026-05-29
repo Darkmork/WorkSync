@@ -1,11 +1,20 @@
-export function Logo() {
+type LogoSize = "sm" | "lg";
+
+// Brand lockup lives in public/ so it has a stable URL and doubles as favicon.
+const LOGO_SRC = "/WSLogo.png";
+
+const SIZE_CLASS: Record<LogoSize, string> = {
+  sm: "h-11", // header / compact
+  lg: "h-28", // login / hero
+};
+
+export function Logo({ size = "sm", className = "" }: { size?: LogoSize; className?: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-white shadow-soft">
-        <span className="font-mono text-sm font-bold">WS</span>
-      </div>
-      <span className="text-2xl font-bold text-primary">WorkSync</span>
-    </div>
+    <img
+      src={LOGO_SRC}
+      alt="WorkSync"
+      className={`${SIZE_CLASS[size]} w-auto select-none ${className}`}
+      draggable={false}
+    />
   );
 }
-

@@ -60,7 +60,9 @@ export function LoginPage() {
     <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
       <section className="grid w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-lift md:grid-cols-[1.05fr_0.95fr]">
         <div className="bg-gradient-to-br from-primary to-secondary p-10 text-white">
-          <Logo />
+          <div className="inline-flex rounded-2xl bg-white p-4 shadow-soft">
+            <Logo size="lg" />
+          </div>
           <div className="mt-24 max-w-md">
             <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-white/70">WorkSync</p>
             <h1 className="mt-3 text-4xl font-bold leading-tight">Encuentra el mejor momento para sincronizar.</h1>
