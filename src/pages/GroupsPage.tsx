@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { BookOpen, BriefcaseBusiness, Calculator, Mail, Plus, Users, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Calculator, Mail, Pencil, Plus, Users, X } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
+import { GroupEditor } from "../components/GroupEditor";
 import { groupStatusLabel } from "../domain/labels";
-import type { GroupType } from "../types/worksync";
+import type { GroupType, WorkGroup } from "../types/worksync";
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
@@ -15,13 +16,14 @@ const groupIcons: Record<GroupType, typeof Calculator> = {
 };
 
 export function GroupsPage() {
-  const { data, createGroup } = useAppData();
+  const { data, createGroup, updateGroup, deleteGroup } = useAppData();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<GroupType>("study");
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
+  const [editingGroup, setEditingGroup] = useState<WorkGroup | null>(null);
 
   if (!data) return <div className="rounded-xl bg-white p-8 shadow-soft">Cargando grupos...</div>;
 
@@ -77,7 +79,14 @@ export function GroupsPage() {
                 <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary-fixed text-primary">
                   <Icon size={28} />
                 </div>
-                <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{groupStatusLabel(group.status)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{groupStatusLabel(group.status)}</span>
+                  {group.ownerId === data.currentUserId && (
+                    <button type="button" onClick={() => setEditingGroup(group)} aria-label="Editar grupo" className="rounded-lg p-2 text-text-secondary transition hover:bg-surface-container hover:text-primary">
+                      <Pencil size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
               <h2 className="text-2xl font-bold">{group.name}</h2>
               <p className="mt-2 min-h-12 text-text-secondary">{group.description}</p>
@@ -175,6 +184,16 @@ export function GroupsPage() {
           )}
         </div>
       </form>
+
+      {editingGroup && (
+        <GroupEditor
+          group={editingGroup}
+          users={data.users}
+          onSave={updateGroup}
+          onDelete={deleteGroup}
+          onClose={() => setEditingGroup(null)}
+        />
+      )}
     </div>
   );
 }

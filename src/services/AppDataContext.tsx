@@ -5,7 +5,7 @@ import { buildRecommendations } from "../domain/recommendations";
 import type { GroupSession, Modality, Recommendation, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
 import { ensureUserProfile, subscribeAuth } from "./auth";
 import { isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
-import { confirmSession, loadWorkSyncData, saveGroup, saveSchedule, saveSession } from "./worksyncRepository";
+import { confirmSession, deleteGroup as removeGroup, loadWorkSyncData, saveGroup, saveSchedule, saveSession, updateGroup as persistGroup } from "./worksyncRepository";
 
 interface AppDataContextValue {
   data: WorkSyncData | null;
@@ -18,6 +18,8 @@ interface AppDataContextValue {
   buildGroupRecommendations: (groupId: string, durationHours: number, modality: Modality) => Recommendation[];
   updateSchedule: (blocks: ScheduleBlock[]) => Promise<void>;
   createGroup: (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[]; invitedEmails?: string[] }) => Promise<void>;
+  updateGroup: (group: WorkGroup) => Promise<void>;
+  deleteGroup: (groupId: string) => Promise<void>;
   createSessionFromRecommendation: (recommendation: Recommendation) => Promise<GroupSession>;
   markSessionConfirmed: (sessionId: string) => Promise<void>;
 }
@@ -116,6 +118,20 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         status: "active",
       };
       const next = await saveGroup(group, data);
+      setData(next);
+    },
+    updateGroup: async (group) => {
+      if (!data) return;
+      const ownEmail = currentUser?.email?.toLowerCase();
+      const invitedEmails = Array.from(
+        new Set((group.invitedEmails ?? []).map((entry) => entry.trim().toLowerCase()).filter((entry) => entry && entry !== ownEmail)),
+      );
+      const next = await persistGroup({ ...group, invitedEmails }, data);
+      setData(next);
+    },
+    deleteGroup: async (groupId) => {
+      if (!data) return;
+      const next = await removeGroup(groupId, data);
       setData(next);
     },
     createSessionFromRecommendation: async (recommendation) => {

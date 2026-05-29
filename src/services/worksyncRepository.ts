@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { demoData, normalizeScheduleBlocks } from "../data/demoData";
 import type { GroupSession, ScheduleBlock, UserProfile, WorkGroup, WorkSyncData } from "../types/worksync";
 import { db, firebaseConfig, isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
@@ -139,6 +139,32 @@ export async function saveGroup(group: WorkGroup, data: WorkSyncData) {
     }
   }
   const next = { ...data, groups: [group, ...data.groups] };
+  await persistLocalData(next);
+  return next;
+}
+
+export async function updateGroup(group: WorkGroup, data: WorkSyncData) {
+  if (isFirebaseConfigured && db) {
+    if (requiresFirebaseAuth) {
+      await setDoc(doc(db, "groups", group.id), group);
+    } else {
+      await savePublicDocument("groups", group.id, group as unknown as Record<string, unknown>);
+    }
+  }
+  const next = { ...data, groups: data.groups.map((item) => (item.id === group.id ? group : item)) };
+  await persistLocalData(next);
+  return next;
+}
+
+export async function deleteGroup(groupId: string, data: WorkSyncData) {
+  if (isFirebaseConfigured && db && requiresFirebaseAuth) {
+    await deleteDoc(doc(db, "groups", groupId));
+  }
+  const next = {
+    ...data,
+    groups: data.groups.filter((item) => item.id !== groupId),
+    sessions: data.sessions.filter((session) => session.groupId !== groupId),
+  };
   await persistLocalData(next);
   return next;
 }
