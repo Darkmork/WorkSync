@@ -200,11 +200,27 @@ atado a hooks → **sin localidad** y **sin tests**. Es el módulo que más deci
 **Archivos:** `src/services/AppDataContext.tsx`, `src/services/worksyncRepository.ts`,
 nuevos `src/domain/mutations.ts` + `mutations.test.ts`, `src/domain/invitations.ts` + test.
 
+**Estado (2026-05-29) — HECHO:**
+- [x] **A1** `src/domain/mutations.ts` puro: cada mutación es `data + intención → { next, write }`,
+      donde `write` es un `WriteOp` (`set`/`update`/`delete` + colección + id + valor). Absorbe construcción
+      de entidades (id inyectable vía `MutationDeps`, color de grupo, location por modalidad), `dedupeInvitedEmails`
+      y los transforms de `next`. Sin imports de Firebase/React.
+- [x] **A4** `src/domain/invitations.ts`: `resolveInvitations(groups, userId, email) → { groups, writes }`,
+      extraído de `loadWorkSyncData`. El caller ejecuta los `writes` (tolerando rechazo) — cargar ya no
+      tiene la escritura embebida.
+- [x] `AppDataContext` reescrito como adaptador delgado: `value` calcula `mutations.*` → `commit(result)` →
+      `setData(next)`. La interfaz `AppDataContextValue` quedó **idéntica** (páginas sin tocar).
+      Se eliminó la pre-inserción redundante de horario por defecto (lo cubre `mutations.saveSchedule`).
+- [x] **C2** `value` memoizado con `useMemo`; además se memoizaron `authProfile`, `currentUser` y
+      `primaryGroup` para que el memo sea efectivo (antes `recommendations` se recalculaba cada render).
+- [x] Tests puros: `mutations.test.ts` (createGroup/updateGroup/deleteGroup/createSession/confirmSession/
+      saveSchedule + dedupe) y `invitations.test.ts` (auto-join, ya-miembro, ajeno, email vacío, multi-grupo).
+
 **Criterios de aceptación:**
-- [ ] La interfaz `AppDataContextValue` no cambia (las páginas no se tocan).
-- [ ] Lógica de mutaciones e invitaciones cubierta por tests puros.
-- [ ] `value` del contexto memoizado.
-- [ ] `npm test`, `npm run lint`, `npm run build` verdes.
+- [x] La interfaz `AppDataContextValue` no cambia (las páginas no se tocan).
+- [x] Lógica de mutaciones e invitaciones cubierta por tests puros.
+- [x] `value` del contexto memoizado.
+- [x] `npm test` (**39**), `npm run lint` (exit 0), `npm run build` verdes.
 
 ---
 
@@ -214,6 +230,13 @@ nuevos `src/domain/mutations.ts` + `mutations.test.ts`, `src/domain/invitations.
 repetida en 6 funciones del repositorio.
 
 **Depende de:** Fase 2 (sin la rama REST, la consolidación es trivial).
+
+> **Estado (2026-05-29) — ABSORBIDA EN FASE 4.** Al extraer las mutaciones puras, el repositorio quedó
+> con una sola costura de persistencia: `applyWrite(op)` (un `switch` sobre `WriteOp`: `set`/`update`/`delete`)
+> y `commit(result)` (= `applyWrite` remoto + `persistLocalData` local). Las 6 funciones duplicadas
+> desaparecieron; un cambio de estrategia de persistencia toca **un solo lugar**. Falta solo, como mejora
+> opcional, un test de `applyWrite` con un doble de Firestore (hoy `commit` se prueba en modo local y la
+> rama Firestore queda cubierta indirectamente por los tests de reglas).
 
 **Pasos:**
 1. Crear una costura `persistDoc(coleccion, id, valor)` y `removeDoc(coleccion, id)` que

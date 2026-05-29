@@ -1,6 +1,8 @@
-import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
 import { demoData, normalizeScheduleBlocks } from "../data/demoData";
-import type { GroupSession, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
+import { resolveInvitations } from "../domain/invitations";
+import type { MutationResult, WriteOp } from "../domain/mutations";
+import type { GroupSession, WorkGroup, WorkSyncData } from "../types/worksync";
 import { db, isFirebaseConfigured } from "./firebase";
 
 const cloneDemo = (): WorkSyncData => JSON.parse(JSON.stringify(demoData)) as WorkSyncData;
@@ -15,6 +17,21 @@ const normalizeData = (data: WorkSyncData, currentUserId = data.currentUserId): 
 });
 
 const localKey = "worksync-demo-data";
+
+// Execute a single persistence intent against Firestore. No-op in local/demo
+// mode (no Firebase) — local state is mirrored to localStorage by commit().
+async function applyWrite(op: WriteOp): Promise<void> {
+  if (!isFirebaseConfigured || !db) return;
+  if (op.kind === "delete") {
+    await deleteDoc(doc(db, op.collection, op.id));
+    return;
+  }
+  if (op.kind === "update") {
+    await updateDoc(doc(db, op.collection, op.id), op.value as DocumentData);
+    return;
+  }
+  await setDoc(doc(db, op.collection, op.id), op.value as DocumentData);
+}
 
 export async function loadWorkSyncData(currentUserId?: string, currentEmail?: string): Promise<WorkSyncData> {
   // Demo / local mode: app runs without Firebase configured (e.g. local dev).
@@ -48,26 +65,11 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
   const groupsById = new Map<string, WorkGroup>();
   groupSnaps.forEach((snap) => snap.docs.forEach((item) => groupsById.set(item.id, { ...(item.data() as WorkGroup), id: item.id })));
 
-  // Resolve invitations: a user invited by email auto-joins on load.
-  const groups = await Promise.all(
-    Array.from(groupsById.values()).map(async (group) => {
-      const memberIds = group.memberIds ?? [];
-      const invited = group.invitedEmails ?? [];
-      const isMember = memberIds.includes(effectiveUserId);
-      const isInvited = email !== "" && invited.some((entry) => entry.toLowerCase() === email);
-      if (isInvited && !isMember && db) {
-        const nextMembers = [...memberIds, effectiveUserId];
-        const nextInvited = invited.filter((entry) => entry.toLowerCase() !== email);
-        try {
-          await updateDoc(doc(db, "groups", group.id), { memberIds: nextMembers, invitedEmails: nextInvited });
-        } catch {
-          // If the self-join write is rejected, still show the group locally.
-        }
-        return { ...group, memberIds: nextMembers, invitedEmails: nextInvited };
-      }
-      return group;
-    }),
-  );
+  // Resolve invitations (pure): an invited user auto-joins. Persist the joins,
+  // tolerating rejection so the group still shows locally with updated members.
+  const { groups, writes } = resolveInvitations(Array.from(groupsById.values()), effectiveUserId, email);
+  await Promise.all(writes.map((op) => applyWrite(op).catch(() => undefined)));
+
   const groupIds = new Set(groups.map((group) => group.id));
   const sessions = allSessions.filter((session) => groupIds.has(session.groupId));
 
@@ -95,68 +97,10 @@ export async function persistLocalData(data: WorkSyncData) {
   }
 }
 
-export async function saveSchedule(userId: string, blocks: ScheduleBlock[], data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await setDoc(doc(db, "schedules", userId), { blocks: normalizeScheduleBlocks(blocks) });
-  }
-  const next = {
-    ...data,
-    schedules: data.schedules.some((schedule) => schedule.userId === userId)
-      ? data.schedules.map((schedule) => (schedule.userId === userId ? { userId, blocks: normalizeScheduleBlocks(blocks) } : schedule))
-      : [...data.schedules, { userId, blocks: normalizeScheduleBlocks(blocks) }],
-  };
-  await persistLocalData(next);
-  return next;
-}
-
-export async function saveGroup(group: WorkGroup, data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await setDoc(doc(db, "groups", group.id), group);
-  }
-  const next = { ...data, groups: [group, ...data.groups] };
-  await persistLocalData(next);
-  return next;
-}
-
-export async function updateGroup(group: WorkGroup, data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await setDoc(doc(db, "groups", group.id), group);
-  }
-  const next = { ...data, groups: data.groups.map((item) => (item.id === group.id ? group : item)) };
-  await persistLocalData(next);
-  return next;
-}
-
-export async function deleteGroup(groupId: string, data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await deleteDoc(doc(db, "groups", groupId));
-  }
-  const next = {
-    ...data,
-    groups: data.groups.filter((item) => item.id !== groupId),
-    sessions: data.sessions.filter((session) => session.groupId !== groupId),
-  };
-  await persistLocalData(next);
-  return next;
-}
-
-export async function saveSession(session: GroupSession, data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await setDoc(doc(db, "sessions", session.id), session);
-  }
-  const next = { ...data, sessions: [session, ...data.sessions] };
-  await persistLocalData(next);
-  return next;
-}
-
-export async function confirmSession(sessionId: string, data: WorkSyncData) {
-  if (isFirebaseConfigured && db) {
-    await updateDoc(doc(db, "sessions", sessionId), { status: "confirmed" });
-  }
-  const next: WorkSyncData = {
-    ...data,
-    sessions: data.sessions.map((session) => (session.id === sessionId ? { ...session, status: "confirmed" } : session)),
-  };
-  await persistLocalData(next);
-  return next;
+// Single persistence seam: push the doc to Firestore (if configured) and mirror
+// the next snapshot to localStorage (demo mode only). Returns the next state.
+export async function commit(result: MutationResult): Promise<WorkSyncData> {
+  await applyWrite(result.write);
+  await persistLocalData(result.next);
+  return result.next;
 }

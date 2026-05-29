@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { User } from "firebase/auth";
-import { createDefaultSchedule } from "../data/demoData";
 import { buildRecommendations } from "../domain/recommendations";
+import * as mutations from "../domain/mutations";
 import type { GroupSession, Modality, Recommendation, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
 import { ensureUserProfile, subscribeAuth } from "./auth";
 import { isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
-import { confirmSession, deleteGroup as removeGroup, loadWorkSyncData, saveGroup, saveSchedule, saveSession, updateGroup as persistGroup } from "./worksyncRepository";
+import { commit, loadWorkSyncData } from "./worksyncRepository";
 
 interface AppDataContextValue {
   data: WorkSyncData | null;
@@ -61,111 +61,80 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [authReady, authUser]);
 
   const effectiveUserId = isFirebaseConfigured && requiresFirebaseAuth && authUser ? authUser.uid : data?.currentUserId;
-  const authProfile = authUser
-    ? {
-        id: authUser.uid,
-        name: authUser.displayName || authUser.email?.split("@")[0] || "Usuario WorkSync",
-        email: authUser.email || "",
-        avatarUrl: authUser.photoURL || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(authUser.email || authUser.uid)}`,
-        context: "WorkSync",
-      }
-    : null;
-  const currentUser = data?.users.find((user) => user.id === effectiveUserId) ?? authProfile ?? null;
-  const primaryGroup = data?.groups.find((group) => group.status === "active") ?? data?.groups[0];
+
+  const authProfile = useMemo(
+    () =>
+      authUser
+        ? {
+            id: authUser.uid,
+            name: authUser.displayName || authUser.email?.split("@")[0] || "Usuario WorkSync",
+            email: authUser.email || "",
+            avatarUrl: authUser.photoURL || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(authUser.email || authUser.uid)}`,
+            context: "WorkSync",
+          }
+        : null,
+    [authUser],
+  );
+
+  const currentUser = useMemo(
+    () => data?.users.find((user) => user.id === effectiveUserId) ?? authProfile ?? null,
+    [data, effectiveUserId, authProfile],
+  );
+
+  const primaryGroup = useMemo(
+    () => data?.groups.find((group) => group.status === "active") ?? data?.groups[0],
+    [data],
+  );
+
   const recommendations = useMemo(
     () => (data && primaryGroup ? buildRecommendations(primaryGroup, data.schedules, 2, "hybrid") : []),
     [data, primaryGroup],
   );
 
-  const value: AppDataContextValue = {
-    data,
-    loading,
-    loadError,
-    firebaseEnabled: isFirebaseConfigured,
-    isAuthenticated: !isFirebaseConfigured || !requiresFirebaseAuth || Boolean(authUser),
-    currentUser,
-    recommendations,
-    buildGroupRecommendations: (groupId, durationHours, modality) => {
-      const group = data?.groups.find((item) => item.id === groupId);
-      return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
-    },
-    updateSchedule: async (blocks) => {
-      if (!data || !effectiveUserId) return;
-      const next = await saveSchedule(effectiveUserId, blocks, {
-        ...data,
-        schedules: data.schedules.some((schedule) => schedule.userId === effectiveUserId)
-          ? data.schedules
-          : [...data.schedules, createDefaultSchedule(effectiveUserId)],
-      });
-      setData(next);
-    },
-    createGroup: async (payload) => {
-      if (!data || !effectiveUserId) return;
-      const memberIds = Array.from(new Set([effectiveUserId, ...(payload.memberIds ?? [])]));
-      const ownEmail = currentUser?.email?.toLowerCase();
-      const invitedEmails = Array.from(
-        new Set((payload.invitedEmails ?? []).map((entry) => entry.trim().toLowerCase()).filter((entry) => entry && entry !== ownEmail)),
-      );
-      const group: WorkGroup = {
-        id: `g-${Date.now()}`,
-        name: payload.name,
-        description: payload.description,
-        type: payload.type,
-        color: payload.type === "study" ? "#0058be" : "#006b2c",
-        ownerId: effectiveUserId,
-        memberIds,
-        invitedEmails,
-        status: "active",
-      };
-      const next = await saveGroup(group, data);
-      setData(next);
-    },
-    updateGroup: async (group) => {
-      if (!data) return;
-      const ownEmail = currentUser?.email?.toLowerCase();
-      const invitedEmails = Array.from(
-        new Set((group.invitedEmails ?? []).map((entry) => entry.trim().toLowerCase()).filter((entry) => entry && entry !== ownEmail)),
-      );
-      const next = await persistGroup({ ...group, invitedEmails }, data);
-      setData(next);
-    },
-    deleteGroup: async (groupId) => {
-      if (!data) return;
-      const next = await removeGroup(groupId, data);
-      setData(next);
-    },
-    createSessionFromRecommendation: async (recommendation) => {
-      if (!data) throw new Error("App data is not ready");
-      const group = data.groups.find((item) => item.id === recommendation.groupId);
-      const session: GroupSession = {
-        id: `s-${Date.now()}`,
-        groupId: recommendation.groupId,
-        title: group ? `Sesion ${group.name}` : "Sesion WorkSync",
-        dateLabel: recommendation.dateLabel,
-        dateISO: recommendation.dateISO,
-        start: recommendation.start,
-        end: recommendation.end,
-        modality: recommendation.modality,
-        location:
-          recommendation.modality === "remote"
-            ? "Google Meet"
-            : recommendation.modality === "in_person"
-              ? "Biblioteca central"
-              : "Biblioteca central + Meet",
-        status: "proposed",
-        score: recommendation.score,
-        justification: recommendation.justification,
-      };
-      const next = await saveSession(session, data);
-      setData(next);
-      return session;
-    },
-    markSessionConfirmed: async (sessionId) => {
-      if (!data) return;
-      const next = await confirmSession(sessionId, data);
-      setData(next);
-    },
-  };
+  // Thin adapter: wire React state -> pure mutation module -> persistence seam.
+  // Memoized so context consumers don't re-render unless a dependency changes.
+  const value = useMemo<AppDataContextValue>(
+    () => ({
+      data,
+      loading,
+      loadError,
+      firebaseEnabled: isFirebaseConfigured,
+      isAuthenticated: !isFirebaseConfigured || !requiresFirebaseAuth || Boolean(authUser),
+      currentUser,
+      recommendations,
+      buildGroupRecommendations: (groupId, durationHours, modality) => {
+        const group = data?.groups.find((item) => item.id === groupId);
+        return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
+      },
+      updateSchedule: async (blocks) => {
+        if (!data || !effectiveUserId) return;
+        setData(await commit(mutations.saveSchedule(data, effectiveUserId, blocks)));
+      },
+      createGroup: async (payload) => {
+        if (!data || !effectiveUserId) return;
+        setData(await commit(mutations.createGroup(data, effectiveUserId, currentUser?.email, payload)));
+      },
+      updateGroup: async (group) => {
+        if (!data) return;
+        setData(await commit(mutations.updateGroup(data, group, currentUser?.email)));
+      },
+      deleteGroup: async (groupId) => {
+        if (!data) return;
+        setData(await commit(mutations.deleteGroup(data, groupId)));
+      },
+      createSessionFromRecommendation: async (recommendation) => {
+        if (!data) throw new Error("App data is not ready");
+        const result = mutations.createSessionFromRecommendation(data, recommendation);
+        setData(await commit(result));
+        return result.session;
+      },
+      markSessionConfirmed: async (sessionId) => {
+        if (!data) return;
+        setData(await commit(mutations.confirmSession(data, sessionId)));
+      },
+    }),
+    [data, loading, loadError, authUser, currentUser, recommendations, effectiveUserId],
+  );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
 }
