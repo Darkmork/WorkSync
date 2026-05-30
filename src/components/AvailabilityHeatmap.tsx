@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { DayKey, UserSchedule, WorkGroup } from "../types/worksync";
+import type { DayKey, UserProfile, UserSchedule, WorkGroup } from "../types/worksync";
 import { days, timeSlots } from "../types/worksync";
 import { cellAt, computeAvailabilityHeatmap } from "../domain/availabilityHeatmap";
 
@@ -11,10 +11,24 @@ function cellStyle(ratio: number, available: number): React.CSSProperties {
 
 const weekdayToDayKey: DayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
-export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; schedules: UserSchedule[] }) {
+export function AvailabilityHeatmap({
+  group,
+  schedules,
+  users = [],
+}: {
+  group: WorkGroup;
+  schedules: UserSchedule[];
+  users?: UserProfile[];
+}) {
   const heatmap = useMemo(() => computeAvailabilityHeatmap(group, schedules), [group, schedules]);
   // Phones get one day at a time with tabs, mirroring the schedule calendar.
   const [activeDay, setActiveDay] = useState<DayKey>(weekdayToDayKey[new Date().getDay()]);
+
+  // Resolve member ids to readable labels. First name keeps grid chips compact;
+  // the full name still feeds tooltips and the aria description.
+  const userById = useMemo(() => new Map(users.map((user) => [user.id, user])), [users]);
+  const fullName = (id: string) => userById.get(id)?.name ?? "Integrante";
+  const shortName = (id: string) => fullName(id).split(" ")[0];
 
   if (heatmap.memberCount === 0) {
     return (
@@ -30,7 +44,7 @@ export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; sc
         <div>
           <h2 className="text-xl font-bold">Disponibilidad del grupo</h2>
           <p className="text-sm text-text-secondary">
-            Cuántos de {heatmap.memberCount} integrantes están libres en cada bloque. Más verde = más gente disponible.
+            Quiénes de los {heatmap.memberCount} integrantes están libres en cada bloque. Más verde = más gente disponible.
           </p>
         </div>
         <div className="flex items-center gap-2 font-mono text-[11px] text-text-secondary">
@@ -59,30 +73,42 @@ export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; sc
         <div className="mt-3 space-y-2">
           {timeSlots.map((slot) => {
             const cell = cellAt(heatmap, activeDay, slot.start);
-            const available = cell?.available ?? 0;
+            const ids = cell?.availableMemberIds ?? [];
             const preferred = cell?.preferred ?? 0;
             return (
               <div
                 key={`${activeDay}-${slot.start}`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle px-4 py-3"
-                style={cellStyle(cell?.ratio ?? 0, available)}
+                className="flex items-start justify-between gap-3 rounded-xl border border-border-subtle px-4 py-3"
+                style={cellStyle(cell?.ratio ?? 0, ids.length)}
               >
                 <div className="min-w-0">
                   <span className="block font-mono text-xs font-bold text-on-surface">{slot.label}</span>
-                  {preferred > 0 && <span className="block text-[11px] font-semibold text-on-surface/70">{preferred} prefieren</span>}
+                  {ids.length > 0 ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {ids.map((id) => (
+                        <span key={id} className="rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-on-surface">
+                          {fullName(id)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="mt-1 block text-[11px] text-on-surface/70">Nadie disponible</span>
+                  )}
                 </div>
-                <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">
-                  {available}/{heatmap.memberCount}
-                </span>
+                {preferred > 0 && (
+                  <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">
+                    {preferred} ★
+                  </span>
+                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Desktop: the full weekly heatmap grid. */}
+      {/* Desktop: the full weekly grid; each cell names who is free. */}
       <div className="hidden overflow-hidden rounded-xl border border-border-subtle lg:block">
-        <div className="grid grid-cols-[92px_repeat(7,minmax(48px,1fr))] border-b border-border-subtle bg-surface-container-low">
+        <div className="grid grid-cols-[92px_repeat(7,minmax(70px,1fr))] border-b border-border-subtle bg-surface-container-low">
           <div className="h-10 border-r border-border-subtle" />
           {days.map((day) => (
             <div key={day.key} className="flex h-10 items-center justify-center border-r border-border-subtle font-mono text-xs font-bold text-primary last:border-r-0">
@@ -91,24 +117,31 @@ export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; sc
           ))}
         </div>
         <div className="custom-scrollbar max-h-[560px] overflow-auto">
-          <div className="grid min-w-[640px] grid-cols-[92px_repeat(7,minmax(48px,1fr))] gap-px bg-border-subtle">
+          <div className="grid min-w-[760px] grid-cols-[92px_repeat(7,minmax(70px,1fr))] gap-px bg-border-subtle">
             {timeSlots.map((slot) => (
               <div className="contents" key={slot.start}>
-                <div className="flex h-11 items-center justify-center bg-white px-1 text-center font-mono text-[10px] leading-tight text-outline">
+                <div className="flex h-12 items-center justify-center bg-white px-1 text-center font-mono text-[10px] leading-tight text-outline">
                   {slot.label}
                 </div>
                 {days.map((day) => {
                   const cell = cellAt(heatmap, day.key, slot.start);
-                  const available = cell?.available ?? 0;
+                  const ids = cell?.availableMemberIds ?? [];
                   const preferred = cell?.preferred ?? 0;
                   return (
                     <div
                       key={`${day.key}-${slot.start}`}
-                      className="flex h-11 items-center justify-center text-[11px] font-bold text-on-surface/80"
-                      style={cellStyle(cell?.ratio ?? 0, available)}
-                      title={`${day.label} ${slot.label}: ${available}/${heatmap.memberCount} disponibles${preferred ? `, ${preferred} prefieren` : ""}`}
+                      className="flex h-12 flex-col items-center justify-center gap-0.5 overflow-hidden px-1 text-center text-[10px] font-semibold leading-tight text-on-surface/85"
+                      style={cellStyle(cell?.ratio ?? 0, ids.length)}
+                      title={
+                        ids.length > 0
+                          ? `${day.label} ${slot.label}: ${ids.map(fullName).join(", ")}${preferred ? ` (${preferred} prefieren)` : ""}`
+                          : `${day.label} ${slot.label}: nadie disponible`
+                      }
                     >
-                      {available > 0 ? available : ""}
+                      {ids.slice(0, 2).map((id) => (
+                        <span key={id} className="block w-full truncate">{shortName(id)}</span>
+                      ))}
+                      {ids.length > 2 && <span className="block text-[9px] text-on-surface/70">+{ids.length - 2}</span>}
                     </div>
                   );
                 })}

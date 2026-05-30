@@ -49,6 +49,7 @@ describe("computeAvailabilityHeatmap", () => {
     const monday = cellAt(hm, "mon", "08:00")!;
     expect(hm.memberCount).toBe(2);
     expect(monday.available).toBe(2);
+    expect(monday.availableMemberIds).toEqual(["u1", "u2"]);
     expect(monday.preferred).toBe(1);
     expect(monday.ratio).toBe(1);
 

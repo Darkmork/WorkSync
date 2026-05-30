@@ -12,6 +12,9 @@ export interface HeatmapCell {
   preferred: number;
   occupied: number;
   ratio: number;
+  // userIds of the members free (free or preferred) in this slot, in member
+  // order, so the UI can name exactly who is available instead of a bare count.
+  availableMemberIds: string[];
 }
 
 export interface AvailabilityHeatmap {
@@ -26,15 +29,16 @@ export function computeAvailabilityHeatmap(group: WorkGroup, schedules: UserSche
 
   for (const day of days) {
     for (const slot of timeSlots) {
-      let available = 0;
+      const availableMemberIds: string[] = [];
       let preferred = 0;
       let occupied = 0;
       for (const schedule of groupSchedules) {
         const state = schedule.blocks.find((block) => block.day === day.key && block.hour === slot.start)?.state;
-        if (state === "free" || state === "preferred") available += 1;
+        if (state === "free" || state === "preferred") availableMemberIds.push(schedule.userId);
         if (state === "preferred") preferred += 1;
         if (state === "occupied" || state === "avoid") occupied += 1;
       }
+      const available = availableMemberIds.length;
       cells.push({
         day: day.key,
         hour: slot.start,
@@ -42,6 +46,7 @@ export function computeAvailabilityHeatmap(group: WorkGroup, schedules: UserSche
         preferred,
         occupied,
         ratio: memberCount > 0 ? available / memberCount : 0,
+        availableMemberIds,
       });
     }
   }

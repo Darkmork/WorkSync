@@ -86,7 +86,7 @@ export function RecommendationsPage() {
           </div>
         )}
 
-        <AvailabilityHeatmap group={group} schedules={data.schedules} />
+        <AvailabilityHeatmap group={group} schedules={data.schedules} users={data.users} />
       </section>
     </div>
   );
