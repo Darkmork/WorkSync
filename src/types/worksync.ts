@@ -42,9 +42,32 @@ export interface TimeSlot {
   kind: "class" | "lunch" | "hour";
 }
 
+// A per-user VIEW over the canonical 30-min storage axis: how wide each editable
+// cell is, which hour range to show, and which weekdays. Storage stays canonical;
+// this only shapes how the owner edits their week. See domain/grid.ts.
+export interface GridConfig {
+  granularityMinutes: 30 | 60;
+  startHour: number;
+  endHour: number;
+  days: DayKey[];
+}
+
 export interface UserSchedule {
   userId: string;
   blocks: ScheduleBlock[];
+  // The owner's editing preference. Absent means "use the default grid".
+  gridConfig?: GridConfig;
+}
+
+// The slice of the week a group is willing to meet in. `days` are the valid
+// weekdays; `from`/`to` bound the time of day ("HH:MM", 24h, zero-padded so
+// they compare lexicographically). Absent/undefined means "no restriction" —
+// the group can meet any day at any school slot, which keeps every existing
+// group working unchanged.
+export interface GroupWindow {
+  days: DayKey[];
+  from: string;
+  to: string;
 }
 
 export interface WorkGroup {
@@ -57,6 +80,7 @@ export interface WorkGroup {
   memberIds: string[];
   invitedEmails?: string[];
   status: "active" | "pending" | "inactive";
+  window?: GroupWindow;
 }
 
 export interface CalendarEvent {
@@ -103,12 +127,52 @@ export interface GroupSession {
   rsvps?: Record<string, RsvpStatus>;
 }
 
+export type PollStatus = "open" | "closed";
+
+// One proposed meeting slot inside a poll. Mirrors the time fields of a
+// Recommendation so a candidate can be built straight from one.
+export interface PollCandidate {
+  id: string;
+  day: DayKey;
+  dateLabel: string;
+  dateISO?: string;
+  start: string;
+  end: string;
+  modality: Modality;
+}
+
+// A lightweight vote among several candidate slots. Uses approval voting: each
+// member approves the candidate slots they can attend, so `votes` maps a userId
+// to the candidate ids they picked. Keying by userId (not candidate) lets a vote
+// write touch only `votes.<uid>`, which the security rule uses to allow members
+// to change their own vote without touching anyone else's.
+export interface Poll {
+  id: string;
+  groupId: string;
+  title: string;
+  createdBy: string;
+  status: PollStatus;
+  candidates: PollCandidate[];
+  votes: Record<string, string[]>;
+  createdAt: number;
+  // Set when the poll is closed: the winning candidate id (most approvals).
+  winnerCandidateId?: string;
+}
+
+// A tallied candidate, ready for the UI: how many members approved it and who.
+export interface PollResult {
+  candidate: PollCandidate;
+  voterIds: string[];
+  count: number;
+}
+
 export interface WorkSyncData {
   users: UserProfile[];
   currentUserId: string;
   schedules: UserSchedule[];
   groups: WorkGroup[];
   sessions: GroupSession[];
+  polls: Poll[];
 }
 
 export const days: Array<{ key: DayKey; short: string; label: string }> = [

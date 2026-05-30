@@ -1,5 +1,6 @@
-import type { ScheduleBlock, UserSchedule, WorkGroup, WorkSyncData, GroupSession } from "../types/worksync";
+import type { Poll, ScheduleBlock, UserSchedule, WorkGroup, WorkSyncData, GroupSession } from "../types/worksync";
 import { days, timeSlots } from "../types/worksync";
+import { migrateScheduleBlocks } from "../domain/grid";
 
 const avatar = (seed: string) => `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=d8e2ff,adc6ff,7ffc97`;
 
@@ -8,21 +9,10 @@ export const createDefaultSchedule = (userId: string): UserSchedule => ({
   blocks: normalizeScheduleBlocks([]),
 });
 
-export const normalizeScheduleBlocks = (blocks: ScheduleBlock[]): ScheduleBlock[] => {
-  const bySlot = new Map(blocks.map((block) => [`${block.day}-${block.hour}`, block]));
-
-  return days.flatMap((day) =>
-    timeSlots.map((slot) => {
-      const existing = bySlot.get(`${day.key}-${slot.start}`);
-      if (existing) return existing;
-      return {
-        day: day.key,
-        hour: slot.start,
-        state: slot.kind === "lunch" || ["08:00", "19:00", "20:00"].includes(slot.start) ? "avoid" : "free",
-      };
-    }),
-  );
-};
+// Storage normalization for any schedule. Old school-slot schedules are migrated
+// onto the canonical 30-min axis; canonical schedules are just default-filled, so
+// every user ends up on one comparable grid for the group engines.
+export const normalizeScheduleBlocks = (blocks: ScheduleBlock[]): ScheduleBlock[] => migrateScheduleBlocks(blocks);
 
 const scheduleFromPattern = (userId: string, preferredDays: string[], busyPairs: string[]): UserSchedule => {
   const blocks: ScheduleBlock[] = days.flatMap((day) =>
@@ -97,6 +87,26 @@ const sessions: GroupSession[] = [
   },
 ];
 
+const polls: Poll[] = [
+  {
+    id: "poll1",
+    groupId: "g1",
+    title: "Cuando hacemos el repaso de Calculo II?",
+    createdBy: "u1",
+    status: "open",
+    candidates: [
+      { id: "pc1", day: "tue", dateLabel: "Martes 24 Oct", start: "15:00", end: "17:00", modality: "hybrid" },
+      { id: "pc2", day: "thu", dateLabel: "Jueves 26 Oct", start: "16:00", end: "18:00", modality: "remote" },
+    ],
+    votes: {
+      u1: ["pc1"],
+      u2: ["pc1", "pc2"],
+      u3: ["pc2"],
+    },
+    createdAt: 0,
+  },
+];
+
 export const demoData: WorkSyncData = {
   currentUserId: "u1",
   users: [
@@ -108,4 +118,5 @@ export const demoData: WorkSyncData = {
   schedules,
   groups,
   sessions,
+  polls,
 };

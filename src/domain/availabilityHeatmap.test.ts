@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { cellAt, computeAvailabilityHeatmap } from "./availabilityHeatmap";
-import { days, timeSlots } from "../types/worksync";
+import { canonicalSlots } from "./grid";
+import { days } from "../types/worksync";
 import type { ScheduleState, UserSchedule, WorkGroup } from "../types/worksync";
 
 function schedule(userId: string, overrides: Record<string, ScheduleState> = {}): UserSchedule {
@@ -27,11 +28,11 @@ function group(memberIds: string[]): WorkGroup {
 }
 
 describe("computeAvailabilityHeatmap", () => {
-  it("emits one cell per day x slot in grid order", () => {
+  it("emits one cell per day x canonical slot in grid order", () => {
     const hm = computeAvailabilityHeatmap(group(["u1"]), []);
-    expect(hm.cells).toHaveLength(days.length * timeSlots.length);
+    expect(hm.cells).toHaveLength(days.length * canonicalSlots.length);
     expect(hm.cells[0].day).toBe("mon");
-    expect(hm.cells[0].hour).toBe(timeSlots[0].start);
+    expect(hm.cells[0].hour).toBe(canonicalSlots[0].start);
   });
 
   it("returns memberCount 0 and zero availability when no member has a schedule", () => {
@@ -61,10 +62,10 @@ describe("computeAvailabilityHeatmap", () => {
 
   it("ignores schedules of users that are not group members", () => {
     const hm = computeAvailabilityHeatmap(group(["u1"]), [
-      schedule("u1", { "wed@09:20": "free" }),
-      schedule("u9", { "wed@09:20": "free" }),
+      schedule("u1", { "wed@09:00": "free" }),
+      schedule("u9", { "wed@09:00": "free" }),
     ]);
     expect(hm.memberCount).toBe(1);
-    expect(cellAt(hm, "wed", "09:20")!.available).toBe(1);
+    expect(cellAt(hm, "wed", "09:00")!.available).toBe(1);
   });
 });

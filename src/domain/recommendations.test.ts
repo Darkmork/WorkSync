@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { buildPersonalRecommendations, buildRecommendations } from "./recommendations";
-import { days, timeSlots } from "../types/worksync";
+import { canonicalSlots } from "./grid";
+import { days } from "../types/worksync";
 import type { ScheduleState, UserSchedule, WorkGroup } from "../types/worksync";
 
+// Build a schedule on the canonical 30-min axis. Overrides are keyed
+// "<day>-<HH:MM>" against the canonical cell starts.
 function schedule(userId: string, overrides: Record<string, ScheduleState> = {}, fallback: ScheduleState = "free"): UserSchedule {
   return {
     userId,
     blocks: days.flatMap((day) =>
-      timeSlots.map((slot) => ({
+      canonicalSlots.map((slot) => ({
         day: day.key,
         hour: slot.start,
         state: overrides[`${day.key}-${slot.start}`] ?? fallback,
@@ -29,9 +32,12 @@ function group(memberIds: string[]): WorkGroup {
   };
 }
 
-const windowSlots = (start: string, durationHours: number) => {
-  const index = timeSlots.findIndex((slot) => slot.start === start);
-  return timeSlots.slice(index, index + durationHours);
+// A contiguous 2-hour (4 canonical cells) window of one state on a given day.
+const windowOverrides = (day: string, start: string, state: ScheduleState): Record<string, ScheduleState> => {
+  const index = canonicalSlots.findIndex((slot) => slot.start === start);
+  const result: Record<string, ScheduleState> = {};
+  for (const slot of canonicalSlots.slice(index, index + 4)) result[`${day}-${slot.start}`] = state;
+  return result;
 };
 
 describe("buildRecommendations", () => {
@@ -50,19 +56,20 @@ describe("buildRecommendations", () => {
     }
     recs.forEach((rec) => {
       expect(rec.score).toBeGreaterThanOrEqual(0);
-      expect(rec.score).toBeLessThanOrEqual(99);
+      expect(rec.score).toBeLessThanOrEqual(100);
     });
   });
 
   it("ranks a window everyone prefers above plain free time", () => {
-    const preferred = { "mon-10:20": "preferred" as const, "mon-11:05": "preferred" as const };
+    const preferred = windowOverrides("mon", "10:00", "preferred");
     const recs = buildRecommendations(group(["u1", "u2"]), [schedule("u1", preferred), schedule("u2", preferred)]);
     const top = recs[0];
 
     expect(top.day).toBe("mon");
-    // The fully-preferred 10:20-11:50 window is the unique best (score 100),
-    // ahead of windows that only partially overlap the preferred blocks.
-    expect(top.start).toBe("10:20");
+    // The fully-preferred 10:00-12:00 window is the unique best (score 100),
+    // ahead of windows that only partially overlap the preferred cells.
+    expect(top.start).toBe("10:00");
+    expect(top.end).toBe("12:00");
     expect(top.score).toBe(100);
     expect(top.availableCount).toBe(top.memberCount);
     expect(top.memberCount).toBe(2);
@@ -70,34 +77,12 @@ describe("buildRecommendations", () => {
     expect(top.justification).toContain("todo el grupo");
   });
 
-  it("never proposes a window that overlaps the lunch block", () => {
-    const aroundLunch = {
-      "mon-12:50": "preferred" as const,
-      "mon-13:35": "preferred" as const,
-      "mon-14:10": "preferred" as const,
-    };
-    const recs = buildRecommendations(
-      group(["u1", "u2"]),
-      [schedule("u1", aroundLunch, "avoid"), schedule("u2", aroundLunch, "avoid")],
-      2,
-      "hybrid",
-    );
-
-    expect(recs.length).toBeGreaterThan(0);
-    recs.forEach((rec) => {
-      expect(rec.start).not.toBe("12:50");
-      expect(rec.start).not.toBe("13:35");
-      expect(windowSlots(rec.start, 2).some((slot) => slot.kind === "lunch")).toBe(false);
-    });
-  });
-
   it("prefers a window where everyone is free over one where a member is occupied", () => {
-    const free = { "tue-10:20": "free" as const, "tue-11:05": "free" as const };
     const recs = buildRecommendations(
       group(["u1", "u2"]),
       [
-        schedule("u1", { ...free, "mon-10:20": "preferred", "mon-11:05": "preferred" }, "avoid"),
-        schedule("u2", { ...free, "mon-10:20": "occupied", "mon-11:05": "occupied" }, "avoid"),
+        schedule("u1", { ...windowOverrides("tue", "10:00", "free"), ...windowOverrides("mon", "10:00", "preferred") }, "avoid"),
+        schedule("u2", { ...windowOverrides("tue", "10:00", "free"), ...windowOverrides("mon", "10:00", "occupied") }, "avoid"),
       ],
       2,
       "hybrid",
@@ -105,18 +90,18 @@ describe("buildRecommendations", () => {
     const top = recs[0];
 
     expect(top.day).toBe("tue");
-    expect(top.start).toBe("10:20");
+    expect(top.start).toBe("10:00");
     expect(top.availableCount).toBe(2);
   });
 
   it("names exactly the available members and reports a real availability percentage", () => {
-    const prefer = { "tue-10:20": "preferred" as const, "tue-11:05": "preferred" as const };
+    const prefer = windowOverrides("tue", "10:00", "preferred");
     const recs = buildRecommendations(
       group(["u1", "u2", "u3"]),
       [
         schedule("u1", prefer, "avoid"),
         schedule("u2", prefer, "avoid"),
-        schedule("u3", { "tue-10:20": "occupied", "tue-11:05": "occupied" }, "avoid"),
+        schedule("u3", windowOverrides("tue", "10:00", "occupied"), "avoid"),
       ],
       2,
       "hybrid",
@@ -124,7 +109,7 @@ describe("buildRecommendations", () => {
     const top = recs[0];
 
     expect(top.day).toBe("tue");
-    expect(top.start).toBe("10:20");
+    expect(top.start).toBe("10:00");
     // Two of three members are free here: name them and report 67%.
     expect(top.availableMemberIds).toEqual(["u1", "u2"]);
     expect(top.availabilityPct).toBe(67);
@@ -133,7 +118,7 @@ describe("buildRecommendations", () => {
   });
 
   it("can recommend a weekend window when that is where availability lines up", () => {
-    const preferred = { "sat-10:20": "preferred" as const, "sat-11:05": "preferred" as const };
+    const preferred = windowOverrides("sat", "10:00", "preferred");
     const recs = buildRecommendations(
       group(["u1", "u2"]),
       [schedule("u1", preferred, "avoid"), schedule("u2", preferred, "avoid")],
@@ -143,8 +128,44 @@ describe("buildRecommendations", () => {
     const top = recs[0];
 
     expect(top.day).toBe("sat");
-    expect(top.start).toBe("10:20");
+    expect(top.start).toBe("10:00");
     expect(top.availableCount).toBe(2);
+  });
+
+  it("restricts candidates to the group's valid window (weekday evenings)", () => {
+    const windowed: WorkGroup = {
+      ...group(["u1", "u2"]),
+      window: { days: ["mon", "tue", "wed", "thu", "fri"], from: "16:00", to: "21:00" },
+    };
+    // u1 prefers a morning block that would normally win, but it is outside the
+    // evening window, so it must never be proposed.
+    const recs = buildRecommendations(windowed, [
+      schedule("u1", { "mon-08:00": "preferred", "mon-08:30": "preferred" }),
+      schedule("u2"),
+    ]);
+
+    expect(recs.length).toBeGreaterThan(0);
+    recs.forEach((rec) => {
+      expect(rec.start >= "16:00").toBe(true);
+      expect(["mon", "tue", "wed", "thu", "fri"]).toContain(rec.day);
+    });
+  });
+
+  it("only proposes weekend windows when the group window is weekend-only", () => {
+    const windowed: WorkGroup = {
+      ...group(["u1", "u2"]),
+      window: { days: ["sat", "sun"], from: "08:00", to: "21:00" },
+    };
+    // A strongly preferred Monday block must be ignored: Monday is not in the window.
+    const recs = buildRecommendations(windowed, [
+      schedule("u1", windowOverrides("mon", "10:00", "preferred")),
+      schedule("u2", windowOverrides("mon", "10:00", "preferred")),
+    ]);
+
+    expect(recs.length).toBeGreaterThan(0);
+    recs.forEach((rec) => {
+      expect(["sat", "sun"]).toContain(rec.day);
+    });
   });
 
   it("labels the requested modality on every candidate", () => {
@@ -166,12 +187,12 @@ describe("buildPersonalRecommendations", () => {
   });
 
   it("surfaces the user's preferred window as the top personal block", () => {
-    const preferred = { "mon-10:20": "preferred" as const, "mon-11:05": "preferred" as const };
+    const preferred = windowOverrides("mon", "10:00", "preferred");
     const recs = buildPersonalRecommendations(schedule("u1", preferred));
 
     expect(recs.length).toBeGreaterThan(0);
     expect(recs[0].day).toBe("mon");
-    expect(recs[0].start).toBe("10:20");
+    expect(recs[0].start).toBe("10:00");
     expect(recs[0].memberCount).toBe(1);
     expect(recs[0].score).toBe(100);
   });

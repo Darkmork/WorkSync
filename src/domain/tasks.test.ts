@@ -66,16 +66,16 @@ describe("countFreeBlocks", () => {
     userId: "u1",
     blocks: [
       { day: "sat", hour: "08:00", state: "free" },
-      { day: "sat", hour: "08:40", state: "preferred" },
-      { day: "sat", hour: "13:35", state: "free" }, // lunch slot, excluded
-      { day: "sat", hour: "14:10", state: "occupied" },
-      { day: "sat", hour: "14:55", state: "avoid" },
+      { day: "sat", hour: "08:30", state: "preferred" },
+      { day: "sat", hour: "13:30", state: "free" },
+      { day: "sat", hour: "14:00", state: "occupied" },
+      { day: "sat", hour: "14:30", state: "avoid" },
       { day: "sun", hour: "08:00", state: "free" },
     ],
   };
 
-  it("counts free and preferred blocks, skipping lunch and busy states", () => {
-    expect(countFreeBlocks(schedule, "sat")).toBe(2);
+  it("counts free and preferred blocks, ignoring busy states", () => {
+    expect(countFreeBlocks(schedule, "sat")).toBe(3);
     expect(countFreeBlocks(schedule, "sun")).toBe(1);
   });
 

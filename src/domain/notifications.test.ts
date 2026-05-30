@@ -36,6 +36,7 @@ const data = (over: Partial<WorkSyncData> = {}): WorkSyncData => ({
   schedules: [],
   groups: [group()],
   sessions: [],
+  polls: [],
   ...over,
 });
 

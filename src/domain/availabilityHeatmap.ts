@@ -1,5 +1,6 @@
 import type { DayKey, UserSchedule, WorkGroup } from "../types/worksync";
-import { days, timeSlots } from "../types/worksync";
+import { days } from "../types/worksync";
+import { canonicalSlots } from "./grid";
 
 // One slot of the week, aggregated across a group's members. `available` =
 // members who marked the slot free or preferred; `occupied` = members who
@@ -19,7 +20,7 @@ export interface HeatmapCell {
 
 export interface AvailabilityHeatmap {
   memberCount: number; // members of the group that actually have a schedule
-  cells: HeatmapCell[]; // one per day x timeSlot, in grid order
+  cells: HeatmapCell[]; // one per day x canonical slot, in grid order
 }
 
 export function computeAvailabilityHeatmap(group: WorkGroup, schedules: UserSchedule[]): AvailabilityHeatmap {
@@ -28,7 +29,7 @@ export function computeAvailabilityHeatmap(group: WorkGroup, schedules: UserSche
   const cells: HeatmapCell[] = [];
 
   for (const day of days) {
-    for (const slot of timeSlots) {
+    for (const slot of canonicalSlots) {
       const availableMemberIds: string[] = [];
       let preferred = 0;
       let occupied = 0;

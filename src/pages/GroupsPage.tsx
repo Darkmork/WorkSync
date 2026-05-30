@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { BookOpen, BriefcaseBusiness, Calculator, Mail, Pencil, Plus, Users, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Calculator, Clock, Mail, Pencil, Plus, Users, X } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
 import { GroupEditor } from "../components/GroupEditor";
 import { groupStatusLabel } from "../domain/labels";
-import type { GroupType, WorkGroup } from "../types/worksync";
+import { days } from "../types/worksync";
+import type { GroupType, GroupWindow, WorkGroup } from "../types/worksync";
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
@@ -13,6 +14,15 @@ const groupIcons: Record<GroupType, typeof Calculator> = {
   work: BriefcaseBusiness,
   personal: Users,
   sports: Users,
+};
+
+// Compact, human-readable summary of a group's valid window for the card.
+const windowSummary = (window: GroupWindow): string => {
+  const dayLabel =
+    window.days.length === 0 || window.days.length === days.length
+      ? "Todos los dias"
+      : days.filter((day) => window.days.includes(day.key)).map((day) => day.short).join(", ");
+  return `${dayLabel} · ${window.from}-${window.to}`;
 };
 
 export function GroupsPage() {
@@ -98,6 +108,12 @@ export function GroupsPage() {
                 </div>
                 <span className="font-mono text-xs text-text-secondary">{group.memberIds.length} integrantes</span>
               </div>
+              {group.window && (
+                <div className="mt-3 flex items-center gap-1.5 border-t border-border-subtle pt-3 font-mono text-[11px] text-text-secondary">
+                  <Clock size={12} className="shrink-0 text-primary" />
+                  <span className="truncate">{windowSummary(group.window)}</span>
+                </div>
+              )}
               {(group.invitedEmails?.length ?? 0) > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1 border-t border-border-subtle pt-3">
                   {group.invitedEmails?.map((email) => (

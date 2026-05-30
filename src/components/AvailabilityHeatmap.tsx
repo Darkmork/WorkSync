@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { DayKey, UserProfile, UserSchedule, WorkGroup } from "../types/worksync";
-import { days, timeSlots } from "../types/worksync";
+import { days } from "../types/worksync";
+import { coreCanonicalSlots } from "../domain/grid";
 import { cellAt, computeAvailabilityHeatmap } from "../domain/availabilityHeatmap";
 
 // Brand green (#006b2c) with alpha scaled by how many members are available.
@@ -71,7 +72,7 @@ export function AvailabilityHeatmap({
           ))}
         </div>
         <div className="mt-3 space-y-2">
-          {timeSlots.map((slot) => {
+          {coreCanonicalSlots.map((slot) => {
             const cell = cellAt(heatmap, activeDay, slot.start);
             const ids = cell?.availableMemberIds ?? [];
             const preferred = cell?.preferred ?? 0;
@@ -118,7 +119,7 @@ export function AvailabilityHeatmap({
         </div>
         <div className="custom-scrollbar max-h-[560px] overflow-auto">
           <div className="grid min-w-[760px] grid-cols-[92px_repeat(7,minmax(70px,1fr))] gap-px bg-border-subtle">
-            {timeSlots.map((slot) => (
+            {coreCanonicalSlots.map((slot) => (
               <div className="contents" key={slot.start}>
                 <div className="flex h-12 items-center justify-center bg-white px-1 text-center font-mono text-[10px] leading-tight text-outline">
                   {slot.label}

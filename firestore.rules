@@ -38,6 +38,29 @@ service cloud.firestore {
             .hasOnly([request.auth.uid]);
     }
 
+    // A poll vote edit may only toggle the caller's own `votes.<uid>` entry, and
+    // must not touch the immutable fields (status, candidates). This is what lets
+    // a member change their own vote while leaving everyone else's intact.
+    function voteEditIsOwnOnly() {
+      return request.resource.data.status == resource.data.status
+        && request.resource.data.candidates == resource.data.candidates
+        && (
+          !('votes' in request.resource.data)
+          || request.resource.data.votes == resource.data.get('votes', {})
+          || request.resource.data.votes
+              .diff(resource.data.get('votes', {}))
+              .affectedKeys()
+              .hasOnly([request.auth.uid])
+        );
+    }
+
+    // The poll's creator closing it: flips status to 'closed' (and may record a
+    // winner). Only the creator may close a poll.
+    function pollOwnerClosing() {
+      return resource.data.createdBy == request.auth.uid
+        && request.resource.data.status == 'closed';
+    }
+
     match /users/{userId} {
       // Profiles (name + avatar) are readable by any signed-in user so that group
       // members can see each other. Email is included; restricting it would require
@@ -104,6 +127,23 @@ service cloud.firestore {
       allow update: if isString(request.resource.data.status)
         && isGroupMember(resource.data.groupId)
         && rsvpEditIsOwnOnly();
+    }
+
+    // Polls let a group vote among candidate meeting slots (approval voting).
+    // Read stays open to any signed-in user (the client filters polls to the
+    // user's groups, since a list query can't verify membership per document —
+    // same limitation as sessions). Writes require group membership: a member
+    // may toggle only their own vote, and only the creator may close the poll.
+    match /polls/{pollId} {
+      allow read: if isSignedIn();
+      allow create: if isString(request.resource.data.groupId)
+        && isString(request.resource.data.title)
+        && request.resource.data.createdBy == request.auth.uid
+        && isList(request.resource.data.candidates)
+        && isGroupMember(request.resource.data.groupId);
+      allow update: if isGroupMember(resource.data.groupId)
+        && (voteEditIsOwnOnly() || pollOwnerClosing());
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.createdBy;
     }
 
     // Per-user notification inbox. Only Cloud Functions (Admin SDK, which bypasses

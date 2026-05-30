@@ -1,5 +1,4 @@
 import type { DayKey, Task, UserSchedule } from "../types/worksync";
-import { timeSlots } from "../types/worksync";
 
 export function createTask(userId: string, title: string, date: string | null): Task {
   return {
@@ -30,10 +29,6 @@ export function sortTasks(tasks: Task[]): Task[] {
 
 const weekdayToDayKey: DayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
-// Hours that are not real working windows (lunch), excluded from "free block"
-// counts so the summary never promises a slot nobody can actually use.
-const nonWorkingHours = new Set(timeSlots.filter((slot) => slot.kind === "lunch").map((slot) => slot.start));
-
 export function dayKeyForDate(date: Date): DayKey {
   return weekdayToDayKey[date.getDay()];
 }
@@ -42,12 +37,12 @@ export function toISODate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-// Open, usable blocks for a given weekday: free or preferred, excluding lunch.
+// Open, usable blocks for a given weekday: the canonical cells the user marked
+// free or preferred.
 export function countFreeBlocks(schedule: UserSchedule | null | undefined, dayKey: DayKey): number {
   if (!schedule) return 0;
   return schedule.blocks.filter(
-    (block) =>
-      block.day === dayKey && !nonWorkingHours.has(block.hour) && (block.state === "free" || block.state === "preferred"),
+    (block) => block.day === dayKey && (block.state === "free" || block.state === "preferred"),
   ).length;
 }
 

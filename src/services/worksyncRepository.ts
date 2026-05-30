@@ -2,7 +2,7 @@ import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where, t
 import { demoData, normalizeScheduleBlocks } from "../data/demoData";
 import { resolveInvitations } from "../domain/invitations";
 import type { MutationResult, WriteOp } from "../domain/mutations";
-import type { GroupSession, WorkGroup, WorkSyncData } from "../types/worksync";
+import type { GroupSession, Poll, WorkGroup, WorkSyncData } from "../types/worksync";
 import { db, isFirebaseConfigured } from "./firebase";
 
 const cloneDemo = (): WorkSyncData => JSON.parse(JSON.stringify(demoData)) as WorkSyncData;
@@ -10,6 +10,8 @@ const cloneDemo = (): WorkSyncData => JSON.parse(JSON.stringify(demoData)) as Wo
 const normalizeData = (data: WorkSyncData, currentUserId = data.currentUserId): WorkSyncData => ({
   ...data,
   currentUserId,
+  // Default polls so data cached before the polls feature still loads cleanly.
+  polls: data.polls ?? [],
   schedules: data.schedules.map((schedule) => ({
     ...schedule,
     blocks: normalizeScheduleBlocks(schedule.blocks),
@@ -50,16 +52,18 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
   if (email) {
     groupQueries.push(getDocs(query(collection(db, "groups"), where("invitedEmails", "array-contains", email))));
   }
-  const [usersSnap, sessionsSnap, schedulesSnap, ...groupSnaps] = await Promise.all([
+  const [usersSnap, sessionsSnap, schedulesSnap, pollsSnap, ...groupSnaps] = await Promise.all([
     getDocs(collection(db, "users")),
     getDocs(collection(db, "sessions")),
     getDocs(collection(db, "schedules")),
+    getDocs(collection(db, "polls")),
     ...groupQueries,
   ]);
 
   const users = usersSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as WorkSyncData["users"];
   const allSessions = sessionsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as GroupSession[];
   const schedules = schedulesSnap.docs.map((item) => ({ ...item.data(), userId: item.id })) as WorkSyncData["schedules"];
+  const allPolls = pollsSnap.docs.map((item) => ({ ...item.data(), id: item.id })) as Poll[];
 
   // The two group queries can overlap, so dedupe by id.
   const groupsById = new Map<string, WorkGroup>();
@@ -72,12 +76,16 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
 
   const groupIds = new Set(groups.map((group) => group.id));
   const sessions = allSessions.filter((session) => groupIds.has(session.groupId));
+  // Polls are read open (like sessions) and filtered to the user's groups; a
+  // per-document membership read rule isn't expressible for a list query.
+  const polls = allPolls.filter((poll) => groupIds.has(poll.groupId));
 
   return normalizeData({
     currentUserId: effectiveUserId,
     users,
     groups,
     sessions,
+    polls,
     schedules: schedules.some((schedule) => schedule.userId === effectiveUserId)
       ? schedules
       : [...schedules, createDefaultUserSchedule(effectiveUserId)],

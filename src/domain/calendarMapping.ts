@@ -1,4 +1,4 @@
-import { timeSlots } from "../types/worksync";
+import { canonicalSlots } from "./grid";
 import type { CalendarEvent, DayKey, ScheduleBlock } from "../types/worksync";
 
 const weekdayToDayKey: Record<number, DayKey> = {
@@ -40,8 +40,7 @@ export function eventsToBusyBlocks(events: CalendarEvent[], blocks: ScheduleBloc
     const startMin = start.getHours() * 60 + start.getMinutes();
     const endMin = end.getHours() * 60 + end.getMinutes();
 
-    for (const slot of timeSlots) {
-      if (slot.kind === "lunch") continue;
+    for (const slot of canonicalSlots) {
       const slotStart = toMinutes(slot.start);
       const slotEnd = toMinutes(slot.end);
       if (slotStart < endMin && slotEnd > startMin) {

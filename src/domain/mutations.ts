@@ -1,11 +1,16 @@
 import { normalizeScheduleBlocks } from "../data/demoData";
+import { winningCandidate } from "./polls";
 import type {
+  GridConfig,
   GroupSession,
   GroupType,
   Modality,
+  Poll,
+  PollCandidate,
   Recommendation,
   RsvpStatus,
   ScheduleBlock,
+  UserSchedule,
   WorkGroup,
   WorkSyncData,
 } from "../types/worksync";
@@ -17,7 +22,7 @@ export type WriteOp =
   | { kind: "update"; collection: WriteCollection; id: string; value: Record<string, unknown> }
   | { kind: "delete"; collection: WriteCollection; id: string };
 
-export type WriteCollection = "groups" | "sessions" | "schedules";
+export type WriteCollection = "groups" | "sessions" | "schedules" | "polls";
 
 export interface MutationResult {
   next: WorkSyncData;
@@ -170,16 +175,108 @@ export function setRsvp(
   };
 }
 
-export function saveSchedule(data: WorkSyncData, userId: string, blocks: ScheduleBlock[]): MutationResult {
+export function saveSchedule(
+  data: WorkSyncData,
+  userId: string,
+  blocks: ScheduleBlock[],
+  gridConfig?: GridConfig,
+): MutationResult {
   const normalized = normalizeScheduleBlocks(blocks);
-  const exists = data.schedules.some((schedule) => schedule.userId === userId);
+  const existing = data.schedules.find((schedule) => schedule.userId === userId);
+  // setDoc replaces the whole doc, so carry the current grid preference forward
+  // when the caller doesn't supply a new one — otherwise saving blocks alone
+  // would wipe a previously stored config. Never write `undefined` to Firestore:
+  // only add the key when there is a config to persist.
+  const nextConfig = gridConfig ?? existing?.gridConfig;
+  const schedule: UserSchedule = nextConfig
+    ? { userId, blocks: normalized, gridConfig: nextConfig }
+    : { userId, blocks: normalized };
+  const value: Record<string, unknown> = nextConfig
+    ? { blocks: normalized, gridConfig: nextConfig }
+    : { blocks: normalized };
   return {
     next: {
       ...data,
-      schedules: exists
-        ? data.schedules.map((schedule) => (schedule.userId === userId ? { userId, blocks: normalized } : schedule))
-        : [...data.schedules, { userId, blocks: normalized }],
+      schedules: existing
+        ? data.schedules.map((entry) => (entry.userId === userId ? schedule : entry))
+        : [...data.schedules, schedule],
     },
-    write: { kind: "set", collection: "schedules", id: userId, value: { blocks: normalized } },
+    write: { kind: "set", collection: "schedules", id: userId, value },
+  };
+}
+
+// --- Polls -------------------------------------------------------------------
+
+export interface CreatePollInput {
+  groupId: string;
+  title: string;
+  candidates: PollCandidate[];
+}
+
+export function createPoll(
+  data: WorkSyncData,
+  createdBy: string,
+  input: CreatePollInput,
+  deps: MutationDeps = defaultDeps,
+): MutationResult {
+  const poll: Poll = {
+    id: deps.id("poll"),
+    groupId: input.groupId,
+    title: input.title,
+    createdBy,
+    status: "open",
+    candidates: input.candidates,
+    votes: {},
+    createdAt: Date.now(),
+  };
+  return {
+    next: { ...data, polls: [poll, ...data.polls] },
+    write: { kind: "set", collection: "polls", id: poll.id, value: asRecord(poll) },
+  };
+}
+
+// Toggle one member's approval of a candidate. The write targets only the
+// caller's own `votes.<uid>` entry (dotted field path) so the security rule can
+// allow a member to change their own vote without touching anyone else's.
+export function castVote(
+  data: WorkSyncData,
+  pollId: string,
+  userId: string,
+  candidateId: string,
+): MutationResult {
+  const poll = data.polls.find((entry) => entry.id === pollId);
+  const current = poll?.votes[userId] ?? [];
+  const nextVotes = current.includes(candidateId)
+    ? current.filter((id) => id !== candidateId)
+    : [...current, candidateId];
+  return {
+    next: {
+      ...data,
+      polls: data.polls.map((entry) =>
+        entry.id === pollId ? { ...entry, votes: { ...entry.votes, [userId]: nextVotes } } : entry,
+      ),
+    },
+    write: { kind: "update", collection: "polls", id: pollId, value: { [`votes.${userId}`]: nextVotes } },
+  };
+}
+
+// Close a poll and record the winning candidate (most approvals). When there are
+// no votes the poll still closes, just without a winner.
+export function closePoll(data: WorkSyncData, pollId: string): MutationResult {
+  const poll = data.polls.find((entry) => entry.id === pollId);
+  const winner = poll ? winningCandidate(poll) : undefined;
+  const value: Record<string, unknown> = winner
+    ? { status: "closed", winnerCandidateId: winner.id }
+    : { status: "closed" };
+  return {
+    next: {
+      ...data,
+      polls: data.polls.map((entry) =>
+        entry.id === pollId
+          ? { ...entry, status: "closed", ...(winner ? { winnerCandidateId: winner.id } : {}) }
+          : entry,
+      ),
+    },
+    write: { kind: "update", collection: "polls", id: pollId, value },
   };
 }

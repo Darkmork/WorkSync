@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 
 let testEnv: RulesTestEnvironment;
 
@@ -48,6 +48,16 @@ beforeEach(async () => {
     await setDoc(doc(db, "sessions", "s1"), { id: "s1", groupId: "g1", title: "Sesión", status: "proposed" });
     await setDoc(doc(db, "schedules", "owner"), { blocks: [] });
     await setDoc(doc(db, "users", "owner"), { name: "Dueño", email: "owner@x.com" });
+    await setDoc(doc(db, "polls", "p1"), {
+      id: "p1",
+      groupId: "g1",
+      title: "Cuándo nos juntamos?",
+      createdBy: "owner",
+      status: "open",
+      candidates: [{ id: "c1", day: "tue", dateLabel: "Mar 24", start: "15:00", end: "17:00", modality: "hybrid" }],
+      votes: {},
+      createdAt: 0,
+    });
   });
 });
 
@@ -131,6 +141,53 @@ describe("sessions: RSVP solo sobre la propia respuesta", () => {
       });
     });
     await assertSucceeds(updateDoc(doc(memberDb(), "sessions", "s1"), { "rsvps.member": "no" }));
+  });
+});
+
+describe("polls: votación por pertenencia al grupo", () => {
+  const candidate = { id: "c1", day: "tue", dateLabel: "Mar 24", start: "15:00", end: "17:00", modality: "hybrid" };
+
+  it("un miembro puede crear un poll en su grupo", async () => {
+    await assertSucceeds(
+      setDoc(doc(memberDb(), "polls", "p2"), {
+        id: "p2", groupId: "g1", title: "Otra fecha?", createdBy: "member", status: "open", candidates: [candidate], votes: {}, createdAt: 0,
+      }),
+    );
+  });
+  it("un ajeno NO puede crear un poll en el grupo", async () => {
+    await assertFails(
+      setDoc(doc(outsiderDb(), "polls", "p3"), {
+        id: "p3", groupId: "g1", title: "Intrusa", createdBy: "outsider", status: "open", candidates: [candidate], votes: {}, createdAt: 0,
+      }),
+    );
+  });
+  it("no se puede crear un poll declarando a otro como creador", async () => {
+    await assertFails(
+      setDoc(doc(memberDb(), "polls", "p4"), {
+        id: "p4", groupId: "g1", title: "Suplantada", createdBy: "owner", status: "open", candidates: [candidate], votes: {}, createdAt: 0,
+      }),
+    );
+  });
+  it("un miembro puede fijar su propio voto", async () => {
+    await assertSucceeds(updateDoc(doc(memberDb(), "polls", "p1"), { "votes.member": ["c1"] }));
+  });
+  it("un miembro NO puede editar el voto de otro integrante", async () => {
+    await assertFails(updateDoc(doc(memberDb(), "polls", "p1"), { "votes.owner": ["c1"] }));
+  });
+  it("un miembro NO puede alterar los candidatos al votar", async () => {
+    await assertFails(updateDoc(doc(memberDb(), "polls", "p1"), { candidates: [] }));
+  });
+  it("el creador puede cerrar el poll y registrar al ganador", async () => {
+    await assertSucceeds(updateDoc(doc(ownerDb(), "polls", "p1"), { status: "closed", winnerCandidateId: "c1" }));
+  });
+  it("un miembro que no es creador NO puede cerrar el poll", async () => {
+    await assertFails(updateDoc(doc(memberDb(), "polls", "p1"), { status: "closed" }));
+  });
+  it("el creador puede eliminar su poll", async () => {
+    await assertSucceeds(deleteDoc(doc(ownerDb(), "polls", "p1")));
+  });
+  it("un ajeno NO puede eliminar el poll", async () => {
+    await assertFails(deleteDoc(doc(outsiderDb(), "polls", "p1")));
   });
 });
 

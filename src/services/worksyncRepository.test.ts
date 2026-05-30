@@ -28,6 +28,7 @@ const baseData = (): WorkSyncData => ({
   schedules: [{ userId: "u1", blocks: [] }],
   groups: [],
   sessions: [],
+  polls: [],
 });
 
 describe("commit (modo local)", () => {

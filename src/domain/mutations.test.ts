@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { normalizeScheduleBlocks } from "../data/demoData";
-import type { GroupSession, Recommendation, WorkGroup, WorkSyncData } from "../types/worksync";
+import type { GridConfig, GroupSession, Poll, Recommendation, WorkGroup, WorkSyncData } from "../types/worksync";
 import {
+  castVote,
+  closePoll,
   confirmSession,
   createGroup,
+  createPoll,
   createSessionFromRecommendation,
   dedupeInvitedEmails,
   deleteGroup,
@@ -49,6 +52,7 @@ const baseData = (): WorkSyncData => ({
   schedules: [{ userId: "u1", blocks: [] }],
   groups: [group("g1"), group("g2")],
   sessions: [session("s1", "g1"), session("s2", "g2")],
+  polls: [],
 });
 
 const recommendation = (overrides: Partial<Recommendation> = {}): Recommendation => ({
@@ -183,5 +187,76 @@ describe("saveSchedule", () => {
   it("agrega un horario nuevo cuando el usuario aún no tiene uno", () => {
     const { next } = saveSchedule(baseData(), "u2", []);
     expect(next.schedules.map((s) => s.userId).sort()).toEqual(["u1", "u2"]);
+  });
+  it("persiste el gridConfig cuando se entrega", () => {
+    const gridConfig: GridConfig = { granularityMinutes: 30, startHour: 16, endHour: 22, days: ["mon", "tue"] };
+    const { next, write } = saveSchedule(baseData(), "u1", [], gridConfig);
+    expect(next.schedules[0].gridConfig).toEqual(gridConfig);
+    expect((write as { value: Record<string, unknown> }).value.gridConfig).toEqual(gridConfig);
+  });
+  it("conserva el gridConfig existente al guardar solo bloques", () => {
+    const gridConfig: GridConfig = { granularityMinutes: 60, startHour: 9, endHour: 18, days: ["mon"] };
+    const data = baseData();
+    data.schedules = [{ userId: "u1", blocks: [], gridConfig }];
+    const { next, write } = saveSchedule(data, "u1", []);
+    expect(next.schedules[0].gridConfig).toEqual(gridConfig);
+    expect((write as { value: Record<string, unknown> }).value.gridConfig).toEqual(gridConfig);
+  });
+  it("no escribe la clave gridConfig cuando no hay ninguno", () => {
+    const { write } = saveSchedule(baseData(), "u1", []);
+    expect("gridConfig" in (write as { value: Record<string, unknown> }).value).toBe(false);
+  });
+});
+
+const samplePoll = (over: Partial<Poll> = {}): Poll => ({
+  id: "poll1",
+  groupId: "g1",
+  title: "Cuando?",
+  createdBy: "u1",
+  status: "open",
+  candidates: [
+    { id: "c1", day: "tue", dateLabel: "Mar 24", start: "15:00", end: "17:00", modality: "hybrid" },
+    { id: "c2", day: "thu", dateLabel: "Jue 26", start: "16:00", end: "18:00", modality: "remote" },
+  ],
+  votes: {},
+  createdAt: 0,
+  ...over,
+});
+
+const pollData = (poll: Poll): WorkSyncData => ({ ...baseData(), polls: [poll] });
+
+describe("createPoll", () => {
+  it("crea un poll abierto sin votos y emite un set", () => {
+    const { next, write } = createPoll(baseData(), "u1", { groupId: "g1", title: "Cuando?", candidates: samplePoll().candidates }, deps);
+    expect(next.polls).toHaveLength(1);
+    expect(next.polls[0]).toMatchObject({ id: "poll-TEST", groupId: "g1", status: "open", votes: {}, createdBy: "u1" });
+    expect(write).toMatchObject({ kind: "set", collection: "polls", id: "poll-TEST" });
+  });
+});
+
+describe("castVote", () => {
+  it("agrega la aprobación del usuario y apunta solo a su propia clave", () => {
+    const { next, write } = castVote(pollData(samplePoll()), "poll1", "u2", "c1");
+    expect(next.polls[0].votes.u2).toEqual(["c1"]);
+    expect(write).toEqual({ kind: "update", collection: "polls", id: "poll1", value: { "votes.u2": ["c1"] } });
+  });
+  it("quita la aprobación al votar de nuevo el mismo candidato", () => {
+    const { next } = castVote(pollData(samplePoll({ votes: { u2: ["c1"] } })), "poll1", "u2", "c1");
+    expect(next.polls[0].votes.u2).toEqual([]);
+  });
+});
+
+describe("closePoll", () => {
+  it("cierra el poll y registra el candidato ganador", () => {
+    const { next, write } = closePoll(pollData(samplePoll({ votes: { u1: ["c2"], u2: ["c2"], u3: ["c1"] } })), "poll1");
+    expect(next.polls[0].status).toBe("closed");
+    expect(next.polls[0].winnerCandidateId).toBe("c2");
+    expect(write).toEqual({ kind: "update", collection: "polls", id: "poll1", value: { status: "closed", winnerCandidateId: "c2" } });
+  });
+  it("cierra sin ganador cuando no hubo votos", () => {
+    const { next, write } = closePoll(pollData(samplePoll()), "poll1");
+    expect(next.polls[0].status).toBe("closed");
+    expect(next.polls[0].winnerCandidateId).toBeUndefined();
+    expect((write as { value: Record<string, unknown> }).value).toEqual({ status: "closed" });
   });
 });

@@ -3,7 +3,7 @@ import type { User } from "firebase/auth";
 import { buildPersonalRecommendations, buildRecommendations } from "../domain/recommendations";
 import { computePersonalInsights, type PersonalInsights } from "../domain/personalInsights";
 import * as mutations from "../domain/mutations";
-import type { GroupSession, Modality, Recommendation, RsvpStatus, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
+import type { GridConfig, GroupSession, Modality, PollCandidate, Recommendation, RsvpStatus, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
 import { ensureUserProfile, subscribeAuth } from "./auth";
 import { isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
 import { commit, loadWorkSyncData } from "./worksyncRepository";
@@ -19,13 +19,16 @@ interface AppDataContextValue {
   personalInsights: PersonalInsights | null;
   personalRecommendations: Recommendation[];
   buildGroupRecommendations: (groupId: string, durationHours: number, modality: Modality) => Recommendation[];
-  updateSchedule: (blocks: ScheduleBlock[]) => Promise<void>;
+  updateSchedule: (blocks: ScheduleBlock[], gridConfig?: GridConfig) => Promise<void>;
   createGroup: (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[]; invitedEmails?: string[] }) => Promise<void>;
   updateGroup: (group: WorkGroup) => Promise<void>;
   deleteGroup: (groupId: string) => Promise<void>;
   createSessionFromRecommendation: (recommendation: Recommendation) => Promise<GroupSession>;
   markSessionConfirmed: (sessionId: string) => Promise<void>;
   setRsvp: (sessionId: string, status: RsvpStatus) => Promise<void>;
+  createPoll: (input: { groupId: string; title: string; candidates: PollCandidate[] }) => Promise<void>;
+  castVote: (pollId: string, candidateId: string) => Promise<void>;
+  closePoll: (pollId: string) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -126,9 +129,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         const group = data?.groups.find((item) => item.id === groupId);
         return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
       },
-      updateSchedule: async (blocks) => {
+      updateSchedule: async (blocks, gridConfig) => {
         if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.saveSchedule(data, effectiveUserId, blocks)));
+        setData(await commit(mutations.saveSchedule(data, effectiveUserId, blocks, gridConfig)));
       },
       createGroup: async (payload) => {
         if (!data || !effectiveUserId) return;
@@ -155,6 +158,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setRsvp: async (sessionId, status) => {
         if (!data || !effectiveUserId) return;
         setData(await commit(mutations.setRsvp(data, sessionId, effectiveUserId, status)));
+      },
+      createPoll: async (input) => {
+        if (!data || !effectiveUserId) return;
+        setData(await commit(mutations.createPoll(data, effectiveUserId, input)));
+      },
+      castVote: async (pollId, candidateId) => {
+        if (!data || !effectiveUserId) return;
+        setData(await commit(mutations.castVote(data, pollId, effectiveUserId, candidateId)));
+      },
+      closePoll: async (pollId) => {
+        if (!data) return;
+        setData(await commit(mutations.closePoll(data, pollId)));
       },
     }),
     [
