@@ -109,6 +109,21 @@ describe("buildRecommendations", () => {
     expect(top.availableCount).toBe(2);
   });
 
+  it("can recommend a weekend window when that is where availability lines up", () => {
+    const preferred = { "sat-10:20": "preferred" as const, "sat-11:05": "preferred" as const };
+    const recs = buildRecommendations(
+      group(["u1", "u2"]),
+      [schedule("u1", preferred, "avoid"), schedule("u2", preferred, "avoid")],
+      2,
+      "hybrid",
+    );
+    const top = recs[0];
+
+    expect(top.day).toBe("sat");
+    expect(top.start).toBe("10:20");
+    expect(top.availableCount).toBe(2);
+  });
+
   it("labels the requested modality on every candidate", () => {
     const recs = buildRecommendations(group(["u1", "u2"]), [schedule("u1"), schedule("u2")], 2, "remote");
 

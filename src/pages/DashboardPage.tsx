@@ -1,6 +1,7 @@
 import { CalendarCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CalendarAgenda } from "../components/CalendarAgenda";
+import { DaySummary } from "../components/DaySummary";
 import { InsightsPanel } from "../components/InsightsPanel";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { TaskList } from "../components/TaskList";
@@ -60,6 +61,7 @@ export function DashboardPage() {
         </div>
 
         <aside className="space-y-6">
+          <DaySummary />
           <InsightsPanel insights={personalInsights} recommendations={personalRecommendations} />
           {recommendations[0] && (
             <div className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">

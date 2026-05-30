@@ -47,7 +47,10 @@ export function buildRecommendations(
 
   const candidates: Recommendation[] = [];
 
-  for (const day of days.slice(0, 5)) {
+  // Every day of the week is fair game, weekends included: a study group may
+  // only line up on a Saturday morning, so the engine must be able to surface
+  // those windows instead of being silently capped at Mon-Fri.
+  for (const day of days) {
     for (let slotIndex = 0; slotIndex + durationHours <= timeSlots.length; slotIndex += 1) {
       const windowSlots = timeSlots.slice(slotIndex, slotIndex + durationHours);
       if (windowSlots.some((slot) => slot.kind === "lunch")) continue;

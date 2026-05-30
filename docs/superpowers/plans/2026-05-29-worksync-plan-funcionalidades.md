@@ -44,7 +44,7 @@ WorkSync hoy es un **coordinador de horarios grupal con una grilla con forma de 
 | 2 | **P1** | Mapa de calor de disponibilidad del grupo ✅ **HECHO** | Grupo | M | No |
 | 3 | **P2** | Recordatorios y notificaciones ✅ **HECHO (backend A+B)** | Ambos | L | **Sí** (Cloud Functions) |
 | 4 | **P2** | RSVP por integrante en sesiones ✅ **HECHO** | Grupo | M | No |
-| 5 | **P2** | Integrar tareas con el horario | Personal | M | No |
+| 5 | **P2** | Integrar tareas con el horario ✅ **HECHO** | Personal | M | No |
 | 6 | **P3** | Grilla flexible + ventana horaria por grupo | Ambos | M-L | No |
 | 7 | **P3** | Modo votación / encuesta de horarios | Grupo | M | No |
 | 8 | **P4** | Zonas horarias de punta a punta | Ambos | M | No |
@@ -208,7 +208,14 @@ reglas Firestore para que un usuario solo edite su propio RSVP.
 - La sesión muestra el conteo y el detalle por persona.
 - La mutación de RSVP es pura y testeada.
 
-### 5. Integrar tareas con el horario
+### 5. Integrar tareas con el horario — ✅ HECHO (2026-05-29)
+
+**Implementado:** helpers puros en `src/domain/tasks.ts` (`dayKeyForDate`, `toISODate`,
+`countFreeBlocks`, `pendingTasksForDate`, `buildDaySummary`) con tests; tarjeta "Tu día"
+(`src/components/DaySummary.tsx`) en el dashboard que cruza tareas del día con bloques libres
+del horario y muestra "Hoy tienes N tareas y M bloques libres" + lista de tareas de hoy.
+Además: el motor de recomendaciones ahora incluye fines de semana (se quitó `days.slice(0,5)`)
+y la grilla de horario es responsiva en móvil (vista de un día con pestañas LUN–DOM).
 
 **Objetivo:** cerrar el loop de planificación personal (tareas + disponibilidad en un solo lugar).
 
