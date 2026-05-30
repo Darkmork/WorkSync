@@ -63,6 +63,8 @@ const recommendation = (overrides: Partial<Recommendation> = {}): Recommendation
   modality: "hybrid",
   availableCount: 3,
   memberCount: 4,
+  availableMemberIds: ["u1", "u2", "u3"],
+  availabilityPct: 75,
   badges: [],
   justification: "Buena franja",
   ...overrides,

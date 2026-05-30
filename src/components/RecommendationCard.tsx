@@ -5,7 +5,10 @@ import type { Recommendation } from "../types/worksync";
 
 export function RecommendationCard({ recommendation, featured = false }: { recommendation: Recommendation; featured?: boolean }) {
   const navigate = useNavigate();
-  const { createSessionFromRecommendation } = useAppData();
+  const { data, createSessionFromRecommendation } = useAppData();
+
+  const nameOf = (id: string) => data?.users.find((user) => user.id === id)?.name ?? "Integrante";
+  const availableNames = recommendation.availableMemberIds.map(nameOf);
 
   const createSession = async () => {
     const session = await createSessionFromRecommendation(recommendation);
@@ -26,8 +29,8 @@ export function RecommendationCard({ recommendation, featured = false }: { recom
           <h3 className="mt-1 text-2xl font-bold text-on-surface">{recommendation.dateLabel}</h3>
         </div>
         <div className="rounded-xl bg-primary-container px-5 py-3 text-center text-white">
-          <div className="text-2xl font-bold">{recommendation.score}%</div>
-          <div className="font-mono text-[11px] uppercase">compatibilidad</div>
+          <div className="text-2xl font-bold">{recommendation.availabilityPct}%</div>
+          <div className="font-mono text-[11px] uppercase">disponibilidad</div>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -41,12 +44,27 @@ export function RecommendationCard({ recommendation, featured = false }: { recom
           </div>
         </div>
         <div className="flex items-start gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-full bg-status-free/20 text-tertiary">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-status-free/20 text-tertiary">
             <Users size={20} />
           </div>
-          <div>
-            <p className="font-mono text-xs uppercase text-text-secondary">Disponibilidad</p>
-            <p className="font-bold">{recommendation.availableCount}/{recommendation.memberCount} integrantes</p>
+          <div className="min-w-0">
+            <p className="font-mono text-xs uppercase text-text-secondary">
+              Disponibles ({recommendation.availableCount}/{recommendation.memberCount})
+            </p>
+            {availableNames.length > 0 ? (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {availableNames.map((name, index) => (
+                  <span
+                    key={`${name}-${index}`}
+                    className="rounded-full bg-status-free/15 px-2.5 py-0.5 text-xs font-semibold text-tertiary"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="font-bold">Nadie disponible aún</p>
+            )}
           </div>
         </div>
       </div>

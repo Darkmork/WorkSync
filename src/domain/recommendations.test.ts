@@ -109,6 +109,29 @@ describe("buildRecommendations", () => {
     expect(top.availableCount).toBe(2);
   });
 
+  it("names exactly the available members and reports a real availability percentage", () => {
+    const prefer = { "tue-10:20": "preferred" as const, "tue-11:05": "preferred" as const };
+    const recs = buildRecommendations(
+      group(["u1", "u2", "u3"]),
+      [
+        schedule("u1", prefer, "avoid"),
+        schedule("u2", prefer, "avoid"),
+        schedule("u3", { "tue-10:20": "occupied", "tue-11:05": "occupied" }, "avoid"),
+      ],
+      2,
+      "hybrid",
+    );
+    const top = recs[0];
+
+    expect(top.day).toBe("tue");
+    expect(top.start).toBe("10:20");
+    // Two of three members are free here: name them and report 67%.
+    expect(top.availableMemberIds).toEqual(["u1", "u2"]);
+    expect(top.availabilityPct).toBe(67);
+    expect(top.availableCount).toBe(2);
+    expect(top.memberCount).toBe(3);
+  });
+
   it("can recommend a weekend window when that is where availability lines up", () => {
     const preferred = { "sat-10:20": "preferred" as const, "sat-11:05": "preferred" as const };
     const recs = buildRecommendations(

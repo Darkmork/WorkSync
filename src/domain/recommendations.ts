@@ -63,7 +63,14 @@ export function buildRecommendations(
           return sum + (block ? stateWeight[block.state] : 0);
         }, 0),
       );
-      const availableCount = memberScores.filter((score) => score > 0).length;
+      // A member counts as available when their window score is positive (no
+      // heavy occupied/avoid blocks dragging it under zero). Keep their ids so
+      // the UI can name exactly who is free.
+      const availableMemberIds = groupSchedules
+        .filter((_, index) => memberScores[index] > 0)
+        .map((schedule) => schedule.userId);
+      const availableCount = availableMemberIds.length;
+      const availabilityPct = Math.round((availableCount / groupSchedules.length) * 100);
       const preferredCount = groupSchedules.filter((schedule) =>
         windowHours.some((windowHour) => blockFor(schedule, day.key, windowHour)?.state === "preferred"),
       ).length;
@@ -92,6 +99,8 @@ export function buildRecommendations(
         modality,
         availableCount,
         memberCount: groupSchedules.length,
+        availableMemberIds,
+        availabilityPct,
         badges,
         justification:
           availableCount === groupSchedules.length

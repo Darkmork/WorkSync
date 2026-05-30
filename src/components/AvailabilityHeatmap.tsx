@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { UserSchedule, WorkGroup } from "../types/worksync";
+import { useMemo, useState } from "react";
+import type { DayKey, UserSchedule, WorkGroup } from "../types/worksync";
 import { days, timeSlots } from "../types/worksync";
 import { cellAt, computeAvailabilityHeatmap } from "../domain/availabilityHeatmap";
 
@@ -9,8 +9,12 @@ function cellStyle(ratio: number, available: number): React.CSSProperties {
   return { backgroundColor: `rgba(0, 107, 44, ${0.18 + ratio * 0.72})` };
 }
 
+const weekdayToDayKey: DayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
 export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; schedules: UserSchedule[] }) {
   const heatmap = useMemo(() => computeAvailabilityHeatmap(group, schedules), [group, schedules]);
+  // Phones get one day at a time with tabs, mirroring the schedule calendar.
+  const [activeDay, setActiveDay] = useState<DayKey>(weekdayToDayKey[new Date().getDay()]);
 
   if (heatmap.memberCount === 0) {
     return (
@@ -36,7 +40,48 @@ export function AvailabilityHeatmap({ group, schedules }: { group: WorkGroup; sc
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border-subtle">
+      {/* Mobile: single-day view with day tabs, like the schedule calendar. */}
+      <div className="lg:hidden">
+        <div className="flex gap-1 overflow-x-auto rounded-xl border border-border-subtle bg-surface-container-low p-1">
+          {days.map((day) => (
+            <button
+              key={day.key}
+              type="button"
+              onClick={() => setActiveDay(day.key)}
+              className={`min-w-[44px] flex-1 rounded-lg px-2 py-2 font-mono text-xs font-bold transition ${
+                activeDay === day.key ? "bg-primary text-white" : "text-on-surface-variant hover:bg-white"
+              }`}
+            >
+              {day.short}
+            </button>
+          ))}
+        </div>
+        <div className="mt-3 space-y-2">
+          {timeSlots.map((slot) => {
+            const cell = cellAt(heatmap, activeDay, slot.start);
+            const available = cell?.available ?? 0;
+            const preferred = cell?.preferred ?? 0;
+            return (
+              <div
+                key={`${activeDay}-${slot.start}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle px-4 py-3"
+                style={cellStyle(cell?.ratio ?? 0, available)}
+              >
+                <div className="min-w-0">
+                  <span className="block font-mono text-xs font-bold text-on-surface">{slot.label}</span>
+                  {preferred > 0 && <span className="block text-[11px] font-semibold text-on-surface/70">{preferred} prefieren</span>}
+                </div>
+                <span className="shrink-0 rounded-full bg-white/65 px-2.5 py-1 font-mono text-[11px] font-bold text-on-surface">
+                  {available}/{heatmap.memberCount}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop: the full weekly heatmap grid. */}
+      <div className="hidden overflow-hidden rounded-xl border border-border-subtle lg:block">
         <div className="grid grid-cols-[92px_repeat(7,minmax(48px,1fr))] border-b border-border-subtle bg-surface-container-low">
           <div className="h-10 border-r border-border-subtle" />
           {days.map((day) => (

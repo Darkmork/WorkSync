@@ -78,6 +78,10 @@ export interface Recommendation {
   modality: Modality;
   availableCount: number;
   memberCount: number;
+  // userIds of the members who are actually free in this window.
+  availableMemberIds: string[];
+  // Real availability ratio as a percentage: availableCount / memberCount.
+  availabilityPct: number;
   badges: string[];
   justification: string;
 }
