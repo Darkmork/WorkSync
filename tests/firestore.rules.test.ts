@@ -110,6 +110,30 @@ describe("sessions: escritura por pertenencia al grupo", () => {
   });
 });
 
+describe("sessions: RSVP solo sobre la propia respuesta", () => {
+  it("un miembro puede fijar su propio RSVP", async () => {
+    await assertSucceeds(updateDoc(doc(memberDb(), "sessions", "s1"), { "rsvps.member": "yes" }));
+  });
+  it("un miembro NO puede editar el RSVP de otro integrante", async () => {
+    await assertFails(updateDoc(doc(memberDb(), "sessions", "s1"), { "rsvps.owner": "no" }));
+  });
+  it("un ajeno NO puede fijar ningún RSVP", async () => {
+    await assertFails(updateDoc(doc(outsiderDb(), "sessions", "s1"), { "rsvps.outsider": "yes" }));
+  });
+  it("un miembro puede cambiar su RSVP dejando intacto el de otro", async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), "sessions", "s1"), {
+        id: "s1",
+        groupId: "g1",
+        title: "Sesión",
+        status: "proposed",
+        rsvps: { owner: "yes", member: "maybe" },
+      });
+    });
+    await assertSucceeds(updateDoc(doc(memberDb(), "sessions", "s1"), { "rsvps.member": "no" }));
+  });
+});
+
 describe("schedules/users: legibles por cualquier autenticado (limitación documentada)", () => {
   it("un autenticado ajeno puede leer un horario", async () => {
     await assertSucceeds(getDoc(doc(outsiderDb(), "schedules", "owner")));

@@ -1,6 +1,7 @@
 import { CalendarCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CalendarAgenda } from "../components/CalendarAgenda";
+import { InsightsPanel } from "../components/InsightsPanel";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { TaskList } from "../components/TaskList";
 import { WeatherWidget } from "../components/WeatherWidget";
@@ -8,7 +9,7 @@ import { sessionStatusLabel } from "../domain/labels";
 import { useAppData } from "../services/AppDataContext";
 
 export function DashboardPage() {
-  const { currentUser, data, recommendations, loading } = useAppData();
+  const { currentUser, data, recommendations, personalInsights, personalRecommendations, loading } = useAppData();
 
   if (loading || !data) return <div className="rounded-xl bg-white p-8 shadow-soft">Cargando WorkSync...</div>;
 
@@ -59,13 +60,16 @@ export function DashboardPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">
-            <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="text-primary" />
-              <h2 className="text-xl font-bold">Recomendaciones inteligentes</h2>
+          <InsightsPanel insights={personalInsights} recommendations={personalRecommendations} />
+          {recommendations[0] && (
+            <div className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">
+              <div className="mb-4 flex items-center gap-2">
+                <Sparkles className="text-primary" />
+                <h2 className="text-xl font-bold">Recomendaciones inteligentes</h2>
+              </div>
+              <RecommendationCard recommendation={recommendations[0]} />
             </div>
-            {recommendations[0] && <RecommendationCard recommendation={recommendations[0]} />}
-          </div>
+          )}
           <CalendarAgenda />
           <TaskList />
         </aside>

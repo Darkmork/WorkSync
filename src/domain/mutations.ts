@@ -4,6 +4,7 @@ import type {
   GroupType,
   Modality,
   Recommendation,
+  RsvpStatus,
   ScheduleBlock,
   WorkGroup,
   WorkSyncData,
@@ -143,6 +144,29 @@ export function confirmSession(data: WorkSyncData, sessionId: string): MutationR
       ),
     },
     write: { kind: "update", collection: "sessions", id: sessionId, value: { status: "confirmed" } },
+  };
+}
+
+// Set (or change) one member's attendance answer. The Firestore write uses a
+// dotted field path (`rsvps.<uid>`) so it only touches the caller's own entry —
+// this is what lets the security rule allow members to edit their own RSVP while
+// rejecting edits to anyone else's, even under concurrent updates.
+export function setRsvp(
+  data: WorkSyncData,
+  sessionId: string,
+  userId: string,
+  status: RsvpStatus,
+): MutationResult {
+  return {
+    next: {
+      ...data,
+      sessions: data.sessions.map((session) =>
+        session.id === sessionId
+          ? { ...session, rsvps: { ...(session.rsvps ?? {}), [userId]: status } }
+          : session,
+      ),
+    },
+    write: { kind: "update", collection: "sessions", id: sessionId, value: { [`rsvps.${userId}`]: status } },
   };
 }
 

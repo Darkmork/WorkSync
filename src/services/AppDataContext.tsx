@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { User } from "firebase/auth";
-import { buildRecommendations } from "../domain/recommendations";
+import { buildPersonalRecommendations, buildRecommendations } from "../domain/recommendations";
+import { computePersonalInsights, type PersonalInsights } from "../domain/personalInsights";
 import * as mutations from "../domain/mutations";
-import type { GroupSession, Modality, Recommendation, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
+import type { GroupSession, Modality, Recommendation, RsvpStatus, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
 import { ensureUserProfile, subscribeAuth } from "./auth";
 import { isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
 import { commit, loadWorkSyncData } from "./worksyncRepository";
@@ -15,6 +16,8 @@ interface AppDataContextValue {
   currentUser: WorkSyncData["users"][number] | null;
   loadError: string;
   recommendations: Recommendation[];
+  personalInsights: PersonalInsights | null;
+  personalRecommendations: Recommendation[];
   buildGroupRecommendations: (groupId: string, durationHours: number, modality: Modality) => Recommendation[];
   updateSchedule: (blocks: ScheduleBlock[]) => Promise<void>;
   createGroup: (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[]; invitedEmails?: string[] }) => Promise<void>;
@@ -22,6 +25,7 @@ interface AppDataContextValue {
   deleteGroup: (groupId: string) => Promise<void>;
   createSessionFromRecommendation: (recommendation: Recommendation) => Promise<GroupSession>;
   markSessionConfirmed: (sessionId: string) => Promise<void>;
+  setRsvp: (sessionId: string, status: RsvpStatus) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -91,6 +95,20 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [data, primaryGroup],
   );
 
+  // The current user's own schedule, used to power the personal (group-less)
+  // insights and recommendations.
+  const personalSchedule = useMemo(
+    () => data?.schedules.find((schedule) => schedule.userId === effectiveUserId) ?? null,
+    [data, effectiveUserId],
+  );
+
+  const personalInsights = useMemo(() => computePersonalInsights(personalSchedule), [personalSchedule]);
+
+  const personalRecommendations = useMemo(
+    () => buildPersonalRecommendations(personalSchedule, 2, "hybrid"),
+    [personalSchedule],
+  );
+
   // Thin adapter: wire React state -> pure mutation module -> persistence seam.
   // Memoized so context consumers don't re-render unless a dependency changes.
   const value = useMemo<AppDataContextValue>(
@@ -102,6 +120,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !isFirebaseConfigured || !requiresFirebaseAuth || Boolean(authUser),
       currentUser,
       recommendations,
+      personalInsights,
+      personalRecommendations,
       buildGroupRecommendations: (groupId, durationHours, modality) => {
         const group = data?.groups.find((item) => item.id === groupId);
         return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
@@ -132,8 +152,22 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         if (!data) return;
         setData(await commit(mutations.confirmSession(data, sessionId)));
       },
+      setRsvp: async (sessionId, status) => {
+        if (!data || !effectiveUserId) return;
+        setData(await commit(mutations.setRsvp(data, sessionId, effectiveUserId, status)));
+      },
     }),
-    [data, loading, loadError, authUser, currentUser, recommendations, effectiveUserId],
+    [
+      data,
+      loading,
+      loadError,
+      authUser,
+      currentUser,
+      recommendations,
+      personalInsights,
+      personalRecommendations,
+      effectiveUserId,
+    ],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

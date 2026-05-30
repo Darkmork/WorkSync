@@ -26,6 +26,18 @@ service cloud.firestore {
         && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
     }
 
+    // RSVP edits may only touch the caller's own entry. True when the write does
+    // not change the `rsvps` map, or changes only the key equal to the caller's
+    // uid — so a member can answer for themselves but never for anyone else.
+    function rsvpEditIsOwnOnly() {
+      return !('rsvps' in request.resource.data)
+        || request.resource.data.rsvps == resource.data.get('rsvps', {})
+        || request.resource.data.rsvps
+            .diff(resource.data.get('rsvps', {}))
+            .affectedKeys()
+            .hasOnly([request.auth.uid]);
+    }
+
     match /users/{userId} {
       // Profiles (name + avatar) are readable by any signed-in user so that group
       // members can see each other. Email is included; restricting it would require
@@ -90,7 +102,17 @@ service cloud.firestore {
         && isString(request.resource.data.status)
         && isGroupMember(request.resource.data.groupId);
       allow update: if isString(request.resource.data.status)
-        && isGroupMember(resource.data.groupId);
+        && isGroupMember(resource.data.groupId)
+        && rsvpEditIsOwnOnly();
+    }
+
+    // Per-user notification inbox. Only Cloud Functions (Admin SDK, which bypasses
+    // these rules) ever create or delete items; the owner may read their inbox and
+    // mark items read. Clients are never allowed to write notifications to anyone.
+    match /notifications/{userId}/items/{itemId} {
+      allow read: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow create, delete: if false;
     }
   }
 }

@@ -100,3 +100,26 @@ export function buildRecommendations(
 
   return candidates.sort((a, b) => b.score - a.score).slice(0, 3);
 }
+
+// Personal recommender: reuse the group engine for a "group of one" so a solo
+// user (with no group) still gets "your best blocks this week". The synthetic
+// group has a single member — the schedule's own owner — so the scoring,
+// lunch-avoidance and ranking all behave identically to the group case.
+export function buildPersonalRecommendations(
+  schedule: UserSchedule | null | undefined,
+  durationHours = 2,
+  modality: Modality = "hybrid",
+): Recommendation[] {
+  if (!schedule || schedule.blocks.length === 0) return [];
+  const personalGroup: WorkGroup = {
+    id: "personal",
+    name: "Tu agenda personal",
+    description: "",
+    type: "personal",
+    color: "#0058be",
+    ownerId: schedule.userId,
+    memberIds: [schedule.userId],
+    status: "active",
+  };
+  return buildRecommendations(personalGroup, [schedule], durationHours, modality);
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRecommendations } from "./recommendations";
+import { buildPersonalRecommendations, buildRecommendations } from "./recommendations";
 import { days, timeSlots } from "../types/worksync";
 import type { ScheduleState, UserSchedule, WorkGroup } from "../types/worksync";
 
@@ -117,5 +117,24 @@ describe("buildRecommendations", () => {
       expect(rec.modality).toBe("remote");
       expect(rec.badges).toContain("Online");
     });
+  });
+});
+
+describe("buildPersonalRecommendations", () => {
+  it("returns nothing without a schedule or with empty blocks", () => {
+    expect(buildPersonalRecommendations(undefined)).toEqual([]);
+    expect(buildPersonalRecommendations(null)).toEqual([]);
+    expect(buildPersonalRecommendations({ userId: "u1", blocks: [] })).toEqual([]);
+  });
+
+  it("surfaces the user's preferred window as the top personal block", () => {
+    const preferred = { "mon-10:20": "preferred" as const, "mon-11:05": "preferred" as const };
+    const recs = buildPersonalRecommendations(schedule("u1", preferred));
+
+    expect(recs.length).toBeGreaterThan(0);
+    expect(recs[0].day).toBe("mon");
+    expect(recs[0].start).toBe("10:20");
+    expect(recs[0].memberCount).toBe(1);
+    expect(recs[0].score).toBe(100);
   });
 });

@@ -1,4 +1,4 @@
-import type { Modality, SessionStatus, WorkGroup } from "../types/worksync";
+import type { Modality, RsvpStatus, SessionStatus, WorkGroup } from "../types/worksync";
 
 export function modalityLabel(modality: Modality): string {
   if (modality === "remote") return "Online";
@@ -16,4 +16,10 @@ export function groupStatusLabel(status: WorkGroup["status"]): string {
   if (status === "active") return "Activo";
   if (status === "pending") return "Pendiente";
   return "Inactivo";
+}
+
+export function rsvpLabel(status: RsvpStatus): string {
+  if (status === "yes") return "Asisto";
+  if (status === "no") return "No asisto";
+  return "Quizás";
 }

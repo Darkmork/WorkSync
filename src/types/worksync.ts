@@ -8,6 +8,9 @@ export type SessionStatus = "proposed" | "confirmed" | "cancelled";
 
 export type Modality = "remote" | "in_person" | "hybrid";
 
+// A member's attendance answer for a session.
+export type RsvpStatus = "yes" | "no" | "maybe";
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -92,6 +95,8 @@ export interface GroupSession {
   status: SessionStatus;
   score: number;
   justification: string;
+  // Per-member attendance answers, keyed by userId. Absent until someone responds.
+  rsvps?: Record<string, RsvpStatus>;
 }
 
 export interface WorkSyncData {

@@ -8,6 +8,7 @@ import {
   dedupeInvitedEmails,
   deleteGroup,
   saveSchedule,
+  setRsvp,
   updateGroup,
   type MutationDeps,
 } from "./mutations";
@@ -148,6 +149,23 @@ describe("confirmSession", () => {
     expect(next.sessions.find((s) => s.id === "s1")?.status).toBe("confirmed");
     expect(next.sessions.find((s) => s.id === "s2")?.status).toBe("proposed");
     expect(write).toEqual({ kind: "update", collection: "sessions", id: "s1", value: { status: "confirmed" } });
+  });
+});
+
+describe("setRsvp", () => {
+  it("añade la respuesta del usuario y emite un write con path anidado por usuario", () => {
+    const { next, write } = setRsvp(baseData(), "s1", "u1", "yes");
+    expect(next.sessions.find((s) => s.id === "s1")?.rsvps).toEqual({ u1: "yes" });
+    expect(next.sessions.find((s) => s.id === "s2")?.rsvps).toBeUndefined();
+    expect(write).toEqual({ kind: "update", collection: "sessions", id: "s1", value: { "rsvps.u1": "yes" } });
+  });
+
+  it("cambia la propia respuesta sin tocar la de otros integrantes", () => {
+    const data = baseData();
+    data.sessions[0].rsvps = { u1: "yes", u2: "no" };
+    const { next, write } = setRsvp(data, "s1", "u1", "maybe");
+    expect(next.sessions.find((s) => s.id === "s1")?.rsvps).toEqual({ u1: "maybe", u2: "no" });
+    expect(write).toEqual({ kind: "update", collection: "sessions", id: "s1", value: { "rsvps.u1": "maybe" } });
   });
 });
 

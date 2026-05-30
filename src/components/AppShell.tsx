@@ -3,6 +3,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
 import { logout } from "../services/auth";
 import { Logo } from "./Logo";
+import { NotificationsBell } from "./NotificationsBell";
 
 const navItems = [
   { to: "/", label: "Inicio", icon: Home },
@@ -47,6 +48,7 @@ export function AppShell() {
             >
               Buscar momento
             </NavLink>
+            <NotificationsBell />
             <img
               className="h-10 w-10 rounded-full border border-border-subtle bg-primary-fixed object-cover"
               src={currentUser?.avatarUrl}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Filter, Sparkles } from "lucide-react";
 import { RecommendationCard } from "../components/RecommendationCard";
+import { AvailabilityHeatmap } from "../components/AvailabilityHeatmap";
 import { useAppData } from "../services/AppDataContext";
 import type { Modality } from "../types/worksync";
 
@@ -84,6 +85,8 @@ export function RecommendationsPage() {
             No hay suficientes horarios para calcular recomendaciones en este grupo.
           </div>
         )}
+
+        <AvailabilityHeatmap group={group} schedules={data.schedules} />
       </section>
     </div>
   );

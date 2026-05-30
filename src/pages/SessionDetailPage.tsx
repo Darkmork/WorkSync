@@ -2,13 +2,31 @@ import { useState } from "react";
 import { CalendarDays, CheckCircle2, MapPin, Video } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
-import { modalityLabel, sessionStatusLabel } from "../domain/labels";
+import { modalityLabel, rsvpLabel, sessionStatusLabel } from "../domain/labels";
 import { createEvent, hasCalendarToken } from "../services/calendar";
 import { toEventDateTime } from "../domain/calendarMapping";
+import { summarizeRsvps, type RsvpResponse } from "../domain/rsvp";
+import type { RsvpStatus } from "../types/worksync";
+
+const rsvpOptions: Array<{ value: RsvpStatus; label: string }> = [
+  { value: "yes", label: "Asisto" },
+  { value: "maybe", label: "Quizás" },
+  { value: "no", label: "No asisto" },
+];
+
+const rsvpBadgeClass = (status: RsvpResponse): string => {
+  if (status === "yes") return "bg-status-free/20 text-tertiary";
+  if (status === "no") return "bg-status-occupied/20 text-error-red";
+  if (status === "maybe") return "bg-secondary-container/25 text-primary";
+  return "bg-surface-container text-text-secondary";
+};
+
+const rsvpBadgeLabel = (status: RsvpResponse): string =>
+  status === "pending" ? "Sin responder" : rsvpLabel(status);
 
 export function SessionDetailPage() {
   const { sessionId } = useParams();
-  const { data, markSessionConfirmed } = useAppData();
+  const { data, currentUser, markSessionConfirmed, setRsvp } = useAppData();
   const [calendarMessage, setCalendarMessage] = useState("");
   const session = data?.sessions.find((item) => item.id === sessionId);
   const group = data?.groups.find((item) => item.id === session?.groupId);
@@ -21,6 +39,13 @@ export function SessionDetailPage() {
       </div>
     );
   }
+
+  const memberIds = group?.memberIds ?? [];
+  const summary = summarizeRsvps(memberIds, session.rsvps);
+  const myId = currentUser?.id;
+  const isMember = Boolean(myId && memberIds.includes(myId));
+  const myRsvp = myId ? session.rsvps?.[myId] : undefined;
+  const userById = (id: string) => data.users.find((user) => user.id === id);
 
   const confirm = async () => {
     await markSessionConfirmed(session.id);
@@ -88,6 +113,36 @@ export function SessionDetailPage() {
           <p className="mt-2 text-on-surface-variant">{session.justification}</p>
         </div>
 
+        {isMember && (
+          <div className="mt-8 rounded-xl border border-border-subtle p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-bold">Tu asistencia</h2>
+              <span className="font-mono text-xs text-text-secondary">
+                {summary.yes} de {summary.total} confirmados
+              </span>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {rsvpOptions.map((option) => {
+                const active = myRsvp === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => void setRsvp(session.id, option.value)}
+                    className={`rounded-lg border px-4 py-2 text-sm font-bold transition-transform active:scale-95 ${
+                      active
+                        ? "border-primary bg-primary text-white"
+                        : "border-border-subtle text-on-surface-variant hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mt-8 flex flex-wrap gap-3">
           <button
             onClick={confirm}
@@ -103,19 +158,35 @@ export function SessionDetailPage() {
       </section>
 
       <aside className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">
-        <h2 className="text-2xl font-bold">Integrantes</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold">Integrantes</h2>
+          <span className="rounded-full bg-status-free/15 px-3 py-1 font-mono text-xs font-bold text-tertiary">
+            {summary.yes}/{summary.total} asisten
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-text-secondary">
+          {summary.yes} asisten · {summary.maybe} quizás · {summary.no} no · {summary.pending} sin responder
+        </p>
         <div className="mt-5 space-y-3">
-          {data.users
-            .filter((user) => group?.memberIds.includes(user.id))
-            .map((user) => (
-              <div key={user.id} className="flex items-center gap-3 rounded-xl border border-border-subtle p-3">
-                <img src={user.avatarUrl} alt={user.name} className="h-10 w-10 rounded-full bg-primary-fixed" />
-                <div>
-                  <p className="font-bold">{user.name}</p>
-                  <p className="text-sm text-text-secondary">{user.context}</p>
+          {summary.entries.map((entry) => {
+            const user = userById(entry.userId);
+            return (
+              <div key={entry.userId} className="flex items-center gap-3 rounded-xl border border-border-subtle p-3">
+                <img
+                  src={user?.avatarUrl ?? `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(entry.userId)}`}
+                  alt={user?.name ?? "Integrante"}
+                  className="h-10 w-10 rounded-full bg-primary-fixed"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold">{user?.name ?? "Integrante"}</p>
+                  <p className="truncate text-sm text-text-secondary">{user?.context ?? "WorkSync"}</p>
                 </div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 font-mono text-[11px] font-bold ${rsvpBadgeClass(entry.status)}`}>
+                  {rsvpBadgeLabel(entry.status)}
+                </span>
               </div>
-            ))}
+            );
+          })}
         </div>
       </aside>
     </div>
