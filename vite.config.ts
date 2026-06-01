@@ -7,7 +7,10 @@ export default defineConfig({
   // Default unit-test run only covers src/. Firestore rules tests live in tests/
   // and run against the emulator via `npm run test:rules`.
   test: {
+    environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
+    setupFiles: ["./src/setupTests.ts"],
+    globals: true,
   },
   build: {
     rollupOptions: {
