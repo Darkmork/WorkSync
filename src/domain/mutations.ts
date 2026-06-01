@@ -22,7 +22,7 @@ export type WriteOp =
   | { kind: "update"; collection: WriteCollection; id: string; value: Record<string, unknown> }
   | { kind: "delete"; collection: WriteCollection; id: string };
 
-export type WriteCollection = "groups" | "sessions" | "schedules" | "polls";
+export type WriteCollection = "groups" | "sessions" | "schedules" | "polls" | "users";
 
 export interface MutationResult {
   next: WorkSyncData;

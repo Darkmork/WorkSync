@@ -77,8 +77,11 @@ export function computeNotifications(
 }
 
 function daysUntil(dateISO: string, now: Date): number | null {
-  const [year, month, day] = dateISO.split("-").map(Number);
+  const parts = dateISO.split("-").map(Number);
+  if (parts.length !== 3) return null;
+  const [year, month, day] = parts;
   if (!year || !month || !day) return null;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
   const target = new Date(year, month - 1, day);
   target.setHours(0, 0, 0, 0);
   const base = new Date(now);

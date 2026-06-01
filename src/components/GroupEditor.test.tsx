@@ -17,6 +17,7 @@ const mockGroup: WorkGroup = {
   color: "#0058be",
   ownerId: "user1",
   memberIds: ["user1"],
+  status: "active",
 };
 
 // Mock the useAppData hook globally

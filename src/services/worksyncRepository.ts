@@ -69,10 +69,9 @@ export async function loadWorkSyncData(currentUserId?: string, currentEmail?: st
   const groupsById = new Map<string, WorkGroup>();
   groupSnaps.forEach((snap) => snap.docs.forEach((item) => groupsById.set(item.id, { ...(item.data() as WorkGroup), id: item.id })));
 
-  // Resolve invitations (pure): an invited user auto-joins. Persist the joins,
-  // tolerating rejection so the group still shows locally with updated members.
+  // Resolve invitations (pure): an invited user auto-joins. Persist the joins.
   const { groups, writes } = resolveInvitations(Array.from(groupsById.values()), effectiveUserId, email);
-  await Promise.all(writes.map((op) => applyWrite(op).catch(() => undefined)));
+  await Promise.all(writes.map((op) => applyWrite(op)));
 
   const groupIds = new Set(groups.map((group) => group.id));
   const sessions = allSessions.filter((session) => groupIds.has(session.groupId));

@@ -230,6 +230,7 @@ export function migrateLegacyBlocks(blocks: ScheduleBlock[]): ScheduleBlock[] {
 
 // Single entry point: normalize a stored schedule to canonical cells, migrating
 // from the old school axis when needed. Safe to call on any schedule shape.
-export function migrateScheduleBlocks(blocks: ScheduleBlock[]): ScheduleBlock[] {
+export function migrateScheduleBlocks(blocks: ScheduleBlock[] | undefined): ScheduleBlock[] {
+  if (!blocks || blocks.length === 0) return normalizeCanonicalBlocks([]);
   return isLegacyBlocks(blocks) ? migrateLegacyBlocks(blocks) : normalizeCanonicalBlocks(blocks);
 }
