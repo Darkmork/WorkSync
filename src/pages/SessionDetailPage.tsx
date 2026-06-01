@@ -6,12 +6,18 @@ import { modalityLabel, rsvpLabel, sessionStatusLabel } from "../domain/labels";
 import { createEvent, hasCalendarToken } from "../services/calendar";
 import { toEventDateTime } from "../domain/calendarMapping";
 import { summarizeRsvps, type RsvpResponse } from "../domain/rsvp";
-import type { RsvpStatus } from "../types/worksync";
+import type { RsvpStatus, RecurringKind } from "../types/worksync";
 
 const rsvpOptions: Array<{ value: RsvpStatus; label: string }> = [
   { value: "yes", label: "Asisto" },
   { value: "maybe", label: "Quizás" },
   { value: "no", label: "No asisto" },
+];
+
+const recurringOptions: Array<{ value: RecurringKind; label: string }> = [
+  { value: "none", label: "No se repite" },
+  { value: "weekly", label: "Semanal" },
+  { value: "biweekly", label: "Quincenal" },
 ];
 
 const rsvpBadgeClass = (status: RsvpResponse): string => {
@@ -106,6 +112,20 @@ export function SessionDetailPage() {
               <p className="font-bold">{session.location}</p>
             </div>
           </div>
+          {session.recurring && session.recurring.kind !== "none" && (
+            <div className="flex items-start gap-3 rounded-xl bg-surface-container-low p-4 md:col-span-2">
+              <div className="text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 2h4a2 2 0 0 1 2 2v4M7 22H5a2 2 0 0 1-2-2v-4M21 12h-4M3 12h4M20 7l2-2-2-2M4 17l-2 2 2 2"/><circle cx="12" cy="12" r="1"/></svg>
+              </div>
+              <div>
+                <p className="font-mono text-xs uppercase text-text-secondary">Repetir</p>
+                <p className="font-bold">
+                  {recurringOptions.find((o) => o.value === session.recurring?.kind)?.label ?? "No se repite"}
+                  {session.recurring?.count ? ` (${session.recurring.count} veces)` : " (ilimitado)"}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 rounded-xl border border-primary/20 bg-primary-container/10 p-5">

@@ -152,6 +152,22 @@ export function confirmSession(data: WorkSyncData, sessionId: string): MutationR
   };
 }
 
+export function updateSession(
+  data: WorkSyncData,
+  sessionId: string,
+  updates: Partial<Pick<GroupSession, "title" | "recurring">>
+): MutationResult {
+  return {
+    next: {
+      ...data,
+      sessions: data.sessions.map((s) =>
+        s.id === sessionId ? { ...s, ...updates } : s
+      ),
+    },
+    write: { kind: "update", collection: "sessions", id: sessionId, value: updates as Record<string, unknown> },
+  };
+}
+
 // Set (or change) one member's attendance answer. The Firestore write uses a
 // dotted field path (`rsvps.<uid>`) so it only touches the caller's own entry —
 // this is what lets the security rule allow members to edit their own RSVP while
@@ -245,6 +261,8 @@ export function castVote(
   candidateId: string,
 ): MutationResult {
   const poll = data.polls.find((entry) => entry.id === pollId);
+  if (!poll) return { next: data, write: { kind: "update", collection: "polls", id: pollId, value: {} } };
+  if (!poll.candidates.some((c) => c.id === candidateId)) return { next: data, write: { kind: "update", collection: "polls", id: pollId, value: {} } };
   const current = poll?.votes[userId] ?? [];
   const nextVotes = current.includes(candidateId)
     ? current.filter((id) => id !== candidateId)

@@ -110,6 +110,13 @@ export interface Recommendation {
   justification: string;
 }
 
+export type RecurringKind = "none" | "weekly" | "biweekly";
+
+export interface RecurringPattern {
+  kind: RecurringKind;
+  count?: number; // number of repetitions, default unlimited
+}
+
 export interface GroupSession {
   id: string;
   groupId: string;
@@ -125,6 +132,7 @@ export interface GroupSession {
   justification: string;
   // Per-member attendance answers, keyed by userId. Absent until someone responds.
   rsvps?: Record<string, RsvpStatus>;
+  recurring?: RecurringPattern;
 }
 
 export type PollStatus = "open" | "closed";
