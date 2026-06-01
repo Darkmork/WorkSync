@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { CalendarDays, CheckCircle2, Clock, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
 import type { Recommendation } from "../types/worksync";
 
-export function RecommendationCard({ recommendation, featured = false }: { recommendation: Recommendation; featured?: boolean }) {
+export const RecommendationCard = memo(function RecommendationCard({ recommendation, featured = false }: { recommendation: Recommendation; featured?: boolean }) {
   const navigate = useNavigate();
   const { data, createSessionFromRecommendation } = useAppData();
 
@@ -87,5 +88,4 @@ export function RecommendationCard({ recommendation, featured = false }: { recom
       </button>
     </article>
   );
-}
-
+});

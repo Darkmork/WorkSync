@@ -1,10 +1,11 @@
+import { memo } from "react";
 import { CheckCircle2, Clock, Crown, Lock, Users, Vote } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
 import { modalityLabel } from "../domain/labels";
 import { hasApproved, summarizePoll, voterCount, winningCandidate } from "../domain/polls";
 import type { Poll, WorkGroup } from "../types/worksync";
 
-export function PollCard({ poll, group }: { poll: Poll; group: WorkGroup }) {
+export const PollCard = memo(function PollCard({ poll, group }: { poll: Poll; group: WorkGroup }) {
   const { data, currentUser, castVote, closePoll } = useAppData();
 
   const myId = currentUser?.id;
@@ -134,4 +135,4 @@ export function PollCard({ poll, group }: { poll: Poll; group: WorkGroup }) {
       )}
     </article>
   );
-}
+});
