@@ -11,6 +11,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark {
+  color: #e1e3e4;
+  background: #191c1d;
+}
+
 * {
   box-sizing: border-box;
 }
