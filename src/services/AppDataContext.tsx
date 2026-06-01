@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { User } from "firebase/auth";
 import { buildPersonalRecommendations, buildRecommendations } from "../domain/recommendations";
 import { computePersonalInsights, type PersonalInsights } from "../domain/personalInsights";
@@ -112,6 +112,113 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [personalSchedule],
   );
 
+  // ── Memoized context methods ────────────────────────────────────────────────
+
+  const buildGroupRecommendations = useCallback(
+    (groupId: string, durationHours: number, modality: Modality) => {
+      const group = data?.groups.find((item) => item.id === groupId);
+      return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
+    },
+    [data],
+  );
+
+  const updateSchedule = useCallback(
+    async (blocks: ScheduleBlock[], gridConfig?: GridConfig) => {
+      if (!data || !effectiveUserId) return;
+      setData(await commit(mutations.saveSchedule(data, effectiveUserId, blocks, gridConfig)));
+    },
+    [data, effectiveUserId],
+  );
+
+  const createGroup = useCallback(
+    async (payload: Pick<WorkGroup, "name" | "description" | "type"> & { memberIds?: string[]; invitedEmails?: string[] }) => {
+      if (!data || !effectiveUserId) return;
+      setData(await commit(mutations.createGroup(data, effectiveUserId, currentUser?.email, payload)));
+    },
+    [data, effectiveUserId, currentUser?.email],
+  );
+
+  const updateGroup = useCallback(
+    async (group: WorkGroup) => {
+      if (!data) return;
+      setData(await commit(mutations.updateGroup(data, group, currentUser?.email)));
+    },
+    [data, currentUser?.email],
+  );
+
+  const deleteGroup = useCallback(
+    async (groupId: string) => {
+      if (!data) return;
+      setData(await commit(mutations.deleteGroup(data, groupId)));
+    },
+    [data],
+  );
+
+  const createSessionFromRecommendation = useCallback(
+    async (recommendation: Recommendation) => {
+      if (!data) throw new Error("App data is not ready");
+      const result = mutations.createSessionFromRecommendation(data, recommendation);
+      const next = await commit(result);
+      setData(next);
+      return result.session;
+    },
+    [data],
+  );
+
+  const markSessionConfirmed = useCallback(
+    async (sessionId: string) => {
+      if (!data) return;
+      setData(await commit(mutations.confirmSession(data, sessionId)));
+    },
+    [data],
+  );
+
+  const setRsvp = useCallback(
+    async (sessionId: string, status: RsvpStatus) => {
+      if (!data || !effectiveUserId) return;
+      const optimistic = mutations.setRsvp(data, sessionId, effectiveUserId, status);
+      setData(optimistic.next);
+      try {
+        const next = await commit(optimistic);
+        setData(next);
+      } catch {
+        setData(data);
+      }
+    },
+    [data, effectiveUserId],
+  );
+
+  const createPoll = useCallback(
+    async (input: { groupId: string; title: string; candidates: PollCandidate[] }) => {
+      if (!data || !effectiveUserId) return;
+      setData(await commit(mutations.createPoll(data, effectiveUserId, input)));
+    },
+    [data, effectiveUserId],
+  );
+
+  const castVote = useCallback(
+    async (pollId: string, candidateId: string) => {
+      if (!data || !effectiveUserId) return;
+      const optimistic = mutations.castVote(data, pollId, effectiveUserId, candidateId);
+      setData(optimistic.next);
+      try {
+        const next = await commit(optimistic);
+        setData(next);
+      } catch {
+        setData(data);
+      }
+    },
+    [data, effectiveUserId],
+  );
+
+  const closePoll = useCallback(
+    async (pollId: string) => {
+      if (!data) return;
+      setData(await commit(mutations.closePoll(data, pollId)));
+    },
+    [data],
+  );
+
   // Thin adapter: wire React state -> pure mutation module -> persistence seam.
   // Memoized so context consumers don't re-render unless a dependency changes.
   const value = useMemo<AppDataContextValue>(
@@ -125,52 +232,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       recommendations,
       personalInsights,
       personalRecommendations,
-      buildGroupRecommendations: (groupId, durationHours, modality) => {
-        const group = data?.groups.find((item) => item.id === groupId);
-        return data && group ? buildRecommendations(group, data.schedules, durationHours, modality) : [];
-      },
-      updateSchedule: async (blocks, gridConfig) => {
-        if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.saveSchedule(data, effectiveUserId, blocks, gridConfig)));
-      },
-      createGroup: async (payload) => {
-        if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.createGroup(data, effectiveUserId, currentUser?.email, payload)));
-      },
-      updateGroup: async (group) => {
-        if (!data) return;
-        setData(await commit(mutations.updateGroup(data, group, currentUser?.email)));
-      },
-      deleteGroup: async (groupId) => {
-        if (!data) return;
-        setData(await commit(mutations.deleteGroup(data, groupId)));
-      },
-      createSessionFromRecommendation: async (recommendation) => {
-        if (!data) throw new Error("App data is not ready");
-        const result = mutations.createSessionFromRecommendation(data, recommendation);
-        setData(await commit(result));
-        return result.session;
-      },
-      markSessionConfirmed: async (sessionId) => {
-        if (!data) return;
-        setData(await commit(mutations.confirmSession(data, sessionId)));
-      },
-      setRsvp: async (sessionId, status) => {
-        if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.setRsvp(data, sessionId, effectiveUserId, status)));
-      },
-      createPoll: async (input) => {
-        if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.createPoll(data, effectiveUserId, input)));
-      },
-      castVote: async (pollId, candidateId) => {
-        if (!data || !effectiveUserId) return;
-        setData(await commit(mutations.castVote(data, pollId, effectiveUserId, candidateId)));
-      },
-      closePoll: async (pollId) => {
-        if (!data) return;
-        setData(await commit(mutations.closePoll(data, pollId)));
-      },
+      buildGroupRecommendations,
+      updateSchedule,
+      createGroup,
+      updateGroup,
+      deleteGroup,
+      createSessionFromRecommendation,
+      markSessionConfirmed,
+      setRsvp,
+      createPoll,
+      castVote,
+      closePoll,
     }),
     [
       data,
@@ -181,7 +253,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       recommendations,
       personalInsights,
       personalRecommendations,
-      effectiveUserId,
+      effectiveUserId, buildGroupRecommendations, updateSchedule, createGroup, updateGroup, deleteGroup, createSessionFromRecommendation, markSessionConfirmed, setRsvp, createPoll, castVote, closePoll],
     ],
   );
 
