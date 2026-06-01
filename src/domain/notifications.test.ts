@@ -99,4 +99,28 @@ describe("computeNotifications", () => {
     );
     expect(past).toEqual([]);
   });
+
+  describe("daysUntil bounds validation", () => {
+    it("returns null for month out of range", () => {
+      const now = new Date("2026-06-01T09:00:00");
+      const out = computeNotifications(
+        data({ sessions: [session({ id: "s5", status: "confirmed", dateISO: "2026-13-01" })] }),
+        "u1",
+        "uno@x.com",
+        now,
+      );
+      expect(out).toEqual([]);
+    });
+
+    it("returns null for day out of range", () => {
+      const now = new Date("2026-06-01T09:00:00");
+      const out = computeNotifications(
+        data({ sessions: [session({ id: "s6", status: "confirmed", dateISO: "2026-05-45" })] }),
+        "u1",
+        "uno@x.com",
+        now,
+      );
+      expect(out).toEqual([]);
+    });
+  });
 });
