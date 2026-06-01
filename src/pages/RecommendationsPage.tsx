@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Filter, Sparkles } from "lucide-react";
+import { Filter, Search, Sparkles } from "lucide-react";
 import { RecommendationCard } from "../components/RecommendationCard";
 import { AvailabilityHeatmap } from "../components/AvailabilityHeatmap";
 import { useAppData } from "../services/AppDataContext";
@@ -10,12 +10,18 @@ export function RecommendationsPage() {
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [durationHours, setDurationHours] = useState(2);
   const [modality, setModality] = useState<Modality>("hybrid");
+  const [search, setSearch] = useState("");
   const groupId = selectedGroupId || data?.groups[0]?.id || "";
   const group = data?.groups.find((item) => item.id === groupId) ?? data?.groups[0];
   const recommendations = useMemo(
     () => (group ? buildGroupRecommendations(group.id, durationHours, modality) : []),
     [buildGroupRecommendations, durationHours, group, modality],
   );
+  const filteredRecommendations = useMemo(() => {
+    if (!search.trim()) return recommendations;
+    const q = search.toLowerCase();
+    return recommendations.filter((r) => r.justification.toLowerCase().includes(q) || r.dateLabel.toLowerCase().includes(q));
+  }, [recommendations, search]);
 
   if (!data || !group) return <div className="rounded-xl bg-white p-8 shadow-soft">Cargando recomendaciones...</div>;
 
@@ -75,9 +81,13 @@ export function RecommendationsPage() {
           <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Recomendaciones inteligentes</p>
           <h1 className="mt-2 text-4xl font-bold">Mejores momentos</h1>
           <p className="mt-2 text-text-secondary">Basado en la disponibilidad y habitos de {group.name}.</p>
+          <div className="relative mt-4">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar recomendaciones..." className="w-full px-10 py-2 border rounded-lg pl-10 border-border-subtle bg-surface-container-low outline-none focus:ring-2 focus:ring-primary" />
+          </div>
         </header>
-        {recommendations.length ? (
-          recommendations.map((recommendation, index) => (
+        {filteredRecommendations.length ? (
+          filteredRecommendations.map((recommendation, index) => (
             <RecommendationCard key={recommendation.id} recommendation={recommendation} featured={index === 0} />
           ))
         ) : (

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { BookOpen, BriefcaseBusiness, Calculator, Clock, Mail, Pencil, Plus, Users, X } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Calculator, Clock, Mail, Pencil, Plus, Search, Users, X } from "lucide-react";
 import { useAppData } from "../services/AppDataContext";
 import { GroupEditor } from "../components/GroupEditor";
 import { groupStatusLabel } from "../domain/labels";
+import { filterGroups } from "../domain/search";
 import { days } from "../types/worksync";
 import type { GroupType, GroupWindow, WorkGroup } from "../types/worksync";
 
@@ -33,10 +34,12 @@ export function GroupsPage() {
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
+  const [search, setSearch] = useState("");
   const [editingGroup, setEditingGroup] = useState<WorkGroup | null>(null);
 
   if (!data) return <div className="rounded-xl bg-white p-8 shadow-soft">Cargando grupos...</div>;
 
+  const filteredGroups = filterGroups(data.groups, search);
   const otherUsers = data.users.filter((user) => user.id !== data.currentUserId);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -79,51 +82,60 @@ export function GroupsPage() {
         </a>
       </section>
 
+      <div className="relative">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar grupos..." className="w-full px-10 py-2 border rounded-lg pl-10 border-border-subtle bg-surface-container-low outline-none focus:ring-2 focus:ring-primary" />
+          </div>
+
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {data.groups.map((group) => {
-          const Icon = groupIcons[group.type];
-          const members = data.users.filter((user) => group.memberIds.includes(user.id));
-          return (
-            <article key={group.id} className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
-              <div className="mb-4 flex items-start justify-between">
-                <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary-fixed text-primary">
-                  <Icon size={28} />
+        {filteredGroups.length === 0 ? (
+          <div className="col-span-full rounded-xl border border-border-subtle bg-white p-8 text-center text-text-secondary shadow-soft">No se encontraron grupos.</div>
+        ) : (
+          filteredGroups.map((group) => {
+            const Icon = groupIcons[group.type];
+            const members = data.users.filter((user) => group.memberIds.includes(user.id));
+            return (
+              <article key={group.id} className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+                <div className="mb-4 flex items-start justify-between">
+                  <div className="grid h-14 w-14 place-items-center rounded-xl bg-primary-fixed text-primary">
+                    <Icon size={28} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{groupStatusLabel(group.status)}</span>
+                    {group.ownerId === data.currentUserId && (
+                      <button type="button" onClick={() => setEditingGroup(group)} aria-label="Editar grupo" className="rounded-lg p-2 text-text-secondary transition hover:bg-surface-container hover:text-primary">
+                        <Pencil size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-status-free/20 px-3 py-1 font-mono text-xs text-tertiary">{groupStatusLabel(group.status)}</span>
-                  {group.ownerId === data.currentUserId && (
-                    <button type="button" onClick={() => setEditingGroup(group)} aria-label="Editar grupo" className="rounded-lg p-2 text-text-secondary transition hover:bg-surface-container hover:text-primary">
-                      <Pencil size={16} />
-                    </button>
-                  )}
+                <h2 className="text-2xl font-bold">{group.name}</h2>
+                <p className="mt-2 min-h-12 text-text-secondary">{group.description}</p>
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="flex -space-x-3">
+                    {members.slice(0, 4).map((member) => (
+                      <img key={member.id} src={member.avatarUrl} alt={member.name} className="h-9 w-9 rounded-full border-2 border-white bg-primary-fixed" />
+                    ))}
+                  </div>
+                  <span className="font-mono text-xs text-text-secondary">{group.memberIds.length} integrantes</span>
                 </div>
-              </div>
-              <h2 className="text-2xl font-bold">{group.name}</h2>
-              <p className="mt-2 min-h-12 text-text-secondary">{group.description}</p>
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex -space-x-3">
-                  {members.slice(0, 4).map((member) => (
-                    <img key={member.id} src={member.avatarUrl} alt={member.name} className="h-9 w-9 rounded-full border-2 border-white bg-primary-fixed" />
-                  ))}
-                </div>
-                <span className="font-mono text-xs text-text-secondary">{group.memberIds.length} integrantes</span>
-              </div>
-              {group.window && (
-                <div className="mt-3 flex items-center gap-1.5 border-t border-border-subtle pt-3 font-mono text-[11px] text-text-secondary">
-                  <Clock size={12} className="shrink-0 text-primary" />
-                  <span className="truncate">{windowSummary(group.window)}</span>
-                </div>
-              )}
-              {(group.invitedEmails?.length ?? 0) > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1 border-t border-border-subtle pt-3">
-                  {group.invitedEmails?.map((email) => (
-                    <span key={email} className="rounded-full bg-secondary-container/25 px-2 py-0.5 font-mono text-[10px] text-primary">{email} · pendiente</span>
-                  ))}
-                </div>
-              )}
-            </article>
-          );
-        })}
+                {group.window && (
+                  <div className="mt-3 flex items-center gap-1.5 border-t border-border-subtle pt-3 font-mono text-[11px] text-text-secondary">
+                    <Clock size={12} className="shrink-0 text-primary" />
+                    <span className="truncate">{windowSummary(group.window)}</span>
+                  </div>
+                )}
+                {(group.invitedEmails?.length ?? 0) > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1 border-t border-border-subtle pt-3">
+                    {group.invitedEmails?.map((email) => (
+                      <span key={email} className="rounded-full bg-secondary-container/25 px-2 py-0.5 font-mono text-[10px] text-primary">{email} · pendiente</span>
+                    ))}
+                  </div>
+                )}
+              </article>
+            );
+          })
+        )}
       </section>
 
       <form id="nuevo-grupo" onSubmit={submit} className="rounded-xl border border-border-subtle bg-white p-6 shadow-soft">
