@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mail, Plus, Trash2, X } from "lucide-react";
 import type { DayKey, UserProfile, WorkGroup } from "../types/worksync";
 import { days } from "../types/worksync";
@@ -29,6 +29,42 @@ export function GroupEditor({ group, users, onSave, onDelete, onClose }: GroupEd
   const [invitedEmails, setInvitedEmails] = useState<string[]>(group.invitedEmails ?? []);
   const [emailInput, setEmailInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus trap for accessibility
+  useEffect(() => {
+    if (!dialogRef.current) return;
+
+    const dialog = dialogRef.current;
+    const focusableSelectors = 'button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const getFocusableElements = () => Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelectors));
+
+    if (dialog) {
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = getFocusableElements();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => dialog.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Optional "valid window": which days and time range this group is willing to
   // meet in. Off by default (every group meets any day at any school slot).
@@ -85,10 +121,17 @@ export function GroupEditor({ group, users, onSave, onDelete, onClose }: GroupEd
   };
 
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-xl bg-white p-6 shadow-lift" onClick={(event) => event.stopPropagation()}>
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4" onClick={onClose} onKeyDown={(e) => e.key === "Escape" && onClose()}>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="group-editor-title"
+        className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-xl bg-white p-6 shadow-lift"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Editar grupo</h2>
+          <h2 id="group-editor-title" className="text-2xl font-bold">Editar grupo</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="text-text-secondary hover:text-on-surface">
             <X size={20} />
           </button>
