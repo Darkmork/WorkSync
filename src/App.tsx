@@ -6,6 +6,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { GroupsPage } from "./pages/GroupsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PollsPage } from "./pages/PollsPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { SessionDetailPage } from "./pages/SessionDetailPage";
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/grupos" element={<GroupsPage />} />
           <Route path="/recomendaciones" element={<RecommendationsPage />} />
           <Route path="/votaciones" element={<PollsPage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/sesiones/:sessionId" element={<SessionDetailPage />} />
         </Route>
       </Route>

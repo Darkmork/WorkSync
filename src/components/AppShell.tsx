@@ -1,4 +1,4 @@
-import { CalendarDays, Home, LogOut, Moon, Sparkles, Sun, Users, Vote } from "lucide-react";
+import { CalendarDays, Home, LogOut, Moon, Sparkles, Sun, Users, Vote, User } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAppData } from "../services/AppDataContext";
 import { logout } from "../services/auth";
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/grupos", label: "Mis grupos", icon: Users },
   { to: "/recomendaciones", label: "Recomendaciones", icon: Sparkles },
   { to: "/votaciones", label: "Votaciones", icon: Vote },
+  { to: "/perfil", label: "Perfil", icon: User },
 ];
 
 export function AppShell() {

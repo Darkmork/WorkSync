@@ -3,6 +3,7 @@ import type { User } from "firebase/auth";
 import { buildPersonalRecommendations, buildRecommendations } from "../domain/recommendations";
 import { computePersonalInsights, type PersonalInsights } from "../domain/personalInsights";
 import * as mutations from "../domain/mutations";
+import { updateProfile as updateProfileMutation } from "../domain/profile";
 import type { GridConfig, GroupSession, Modality, PollCandidate, Recommendation, RsvpStatus, ScheduleBlock, WorkGroup, WorkSyncData } from "../types/worksync";
 import { ensureUserProfile, subscribeAuth } from "./auth";
 import { isFirebaseConfigured, requiresFirebaseAuth } from "./firebase";
@@ -29,6 +30,7 @@ interface AppDataContextValue {
   createPoll: (input: { groupId: string; title: string; candidates: PollCandidate[] }) => Promise<void>;
   castVote: (pollId: string, candidateId: string) => Promise<void>;
   closePoll: (pollId: string) => Promise<void>;
+  updateProfile: (updates: Partial<Pick<WorkSyncData["users"][number], "name" | "avatarUrl" | "context">>) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -219,6 +221,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [data],
   );
 
+  const updateProfile = useCallback(
+    async (updates: Partial<Pick<WorkSyncData["users"][number], "name" | "avatarUrl" | "context">>) => {
+      if (!data || !effectiveUserId) return;
+      setData(await commit(updateProfileMutation(data, effectiveUserId, updates)));
+    },
+    [data, effectiveUserId],
+  );
+
   // Thin adapter: wire React state -> pure mutation module -> persistence seam.
   // Memoized so context consumers don't re-render unless a dependency changes.
   const value = useMemo<AppDataContextValue>(
@@ -243,6 +253,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       createPoll,
       castVote,
       closePoll,
+      updateProfile,
     }),
     [
       data,
@@ -253,7 +264,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       recommendations,
       personalInsights,
       personalRecommendations,
-      effectiveUserId, buildGroupRecommendations, updateSchedule, createGroup, updateGroup, deleteGroup, createSessionFromRecommendation, markSessionConfirmed, setRsvp, createPoll, castVote, closePoll],
+      data, loading, loadError, authUser, currentUser, recommendations, personalInsights, personalRecommendations, effectiveUserId, buildGroupRecommendations, updateSchedule, createGroup, updateGroup, deleteGroup, createSessionFromRecommendation, markSessionConfirmed, setRsvp, createPoll, castVote, closePoll, updateProfile,
     ],
   );
 
